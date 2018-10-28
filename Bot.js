@@ -4,10 +4,12 @@
   */
 const Bot = require('bot-sdk');
 let ConnUtils = require('./tools/ConnUtils');
+const privateKey = require("./rsaKeys.js").privateKey;
+const questions = require('./questions');
 
 
 //定义一轮问答中的问题数量
-const GAME_LENGTH = 10;
+const GAME_LENGTH = 5;
 //定义每个问题的答案数量
 const ANSWER_COUNT = 3;
 
@@ -44,13 +46,12 @@ class InquiryBot extends Bot {
         return new Promise(function (resolve, reject) {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                
+                                  //初始化一轮中的问题列表和第一题的话术
+                    let repromptText = self.startNewGame();
+                    let card = new Bot.Card.TextCard(repromptText);
     		    //if (typeof(results) != "undefined" && results.length > 0){
                 if(!error){
                     let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-                    //初始化一轮中的问题列表和第一题的话术
-                    let repromptText = this.startNewGame();
-                    let card = new Bot.Card.TextCard(repromptText);
     		        resolve({
                         card: card,
                         outputSpeech: speechOutput + repromptText
