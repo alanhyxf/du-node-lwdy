@@ -12,6 +12,11 @@ const defaultBkg = 'http://dbp-resource.gz.bcebos.com/92bb7de1-5d92-dab4-9c39-84
 const titleStr = '对诗李白';
 const PoemList = ["悯农","将进酒"];
 
+//定义一轮问答中的问题数量
+const GAME_LENGTH = 5;
+//定义每个问题的答案数量
+const ANSWER_COUNT = 3;
+
 
 class InquiryBot extends Bot {
     genToken(token) {
@@ -19,6 +24,7 @@ class InquiryBot extends Bot {
 
         return buffer.toString('base64');
     } 
+
    constructor(postData) {
         super(postData);
 
@@ -49,33 +55,64 @@ class InquiryBot extends Bot {
         let self=this;
         let userid=this.request.getUserId();
 
-	console.log('launch1:'+userid);
+	    console.log('launch1:'+userid);
 
-	let query_str ="SELECT username " +
-				"FROM hy_users " +
-				"WHERE (userid = ?) " +
-				"LIMIT 1 ";
-       let query_var=userid;
+    	let query_str ="SELECT username " +
+    				"FROM hy_users " +
+    				"WHERE (userid = ?) " +
+    				"LIMIT 1 ";
+        let query_var=userid;
+        
+
         return new Promise(function (resolve, reject) {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                console.log('launch2'+results);
-		//if (typeof(results) != "undefined" && results.length > 0){
+                
+    		    //if (typeof(results) != "undefined" && results.length > 0){
                 if(!error){
-		    resolve({
+                    let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
+                    //初始化一轮中的问题列表和第一题的话术
+                    let repromptText = this.startNewGame();
+                    let card = new Bot.Card.TextCard(repromptText);
+    		        resolve({
                         directives: [self.getTemplate1(results[0].username)],
-                        outputSpeech: '欢迎你' + results[0].username 
-                    });
+                        outputSpeech: speechOutput
+                        });
                 }else{
                     resolve({
                         directives: [self.getTemplate1(results[0].name)],
                         outputSpeech: '欢迎来到对诗李白。你还没登记账号呢吧。请发指令注册账号'
                     });
-                }
+                }       
             });
         });
 
 
+    }
+
+
+  startNewGame() {
+        let questionsList = questions.QUESTIONS;
+        let gameQuestions = this.populateGameQuestions(questionsList);
+        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+        console.log(correctAnswerIndex);
+        let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+        let currentQuestionIndex = 0;
+        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+        let repromptText = '第1题：\n' + spokenQuestion + '\n';
+        for (let i = 0; i < ANSWER_COUNT; i += 1) {
+            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+        }
+
+        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+
+        this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+        this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+        this.setSessionAttribute('gameQuestions',gameQuestions);
+        this.setSessionAttribute('questionsList',questionsList);
+        this.setSessionAttribute('score',0);
+        this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+        return repromptText;
     }
 
 
