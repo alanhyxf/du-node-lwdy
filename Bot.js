@@ -5,12 +5,6 @@
 const Bot = require('bot-sdk');
 let ConnUtils = require('./tools/ConnUtils');
 
- 
-const welcomeStr = '欢迎使用对诗李白，我会随机选择一句李白的诗，你来对下句。现在跟我说开始对诗吧！';
-const helpStr = '抱歉我没有理解你的意思。说开始对诗开始吧。';
-const defaultBkg = 'http://dbp-resource.gz.bcebos.com/92bb7de1-5d92-dab4-9c39-84c1998470a3/default.jpg?authorization=bce-auth-v1%2Fa4d81bbd930c41e6857b989362415714%2F2018-10-17T14%3A47%3A46Z%2F-1%2F%2Fcf2a0f8ff98250a2a00e592bb42b5f1d2d001e6ff96e24320548e5932615d0b0';
-const titleStr = '对诗李白';
-const PoemList = ["悯农","将进酒"];
 
 //定义一轮问答中的问题数量
 const GAME_LENGTH = 10;
@@ -21,35 +15,22 @@ const ANSWER_COUNT = 3;
 class InquiryBot extends Bot {
     genToken(token) {
         let buffer = new Buffer(token.toString());
-
         return buffer.toString('base64');
     } 
 
    constructor(postData) {
         super(postData);
-
         this.addLaunchHandler(this.launch);
-
         this.addSessionEndedHandler(this.sessionEndedRequest);
-
         this.addIntentHandler('Regis', this.register);
-
-        //悯农
         this.addIntentHandler('answer_intent', this.AnswerIntent);
         this.addIntentHandler('newGame_intent', this.newGame);
-
-        //缺省意图
         this.addIntentHandler('ai.dueros.common.default_intent', this.CommonIntent);
-
-
         this.addDefaultEventListener(this.defaultEvent);
     }
 
-
-
     launch() {
         this.waitAnswer();
-//        let template = this.getHomeCard();
         let self=this;
         let userid=this.request.getUserId();
 
@@ -60,8 +41,6 @@ class InquiryBot extends Bot {
     				"WHERE (userid = ?) " +
     				"LIMIT 1 ";
         let query_var=userid;
-        
-
         return new Promise(function (resolve, reject) {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
@@ -84,10 +63,7 @@ class InquiryBot extends Bot {
                 }       
             });
         });
-
-
     }
-
 
     startNewGame() {
         let questionsList = questions.QUESTIONS;
@@ -112,7 +88,6 @@ class InquiryBot extends Bot {
         this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
         return repromptText;
     }
-
 
   /**
      *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
@@ -142,7 +117,6 @@ class InquiryBot extends Bot {
         }
         return gameQuestions;
     }
-
 
   /**
      *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
@@ -180,7 +154,6 @@ class InquiryBot extends Bot {
         answers[0] = answers[correctAnswerTargetLocation];
         answers[correctAnswerTargetLocation] = swapTemp2;
         return answers;
-        }
     }
 
     getTemplate1(text) {
@@ -223,14 +196,12 @@ class InquiryBot extends Bot {
     }
 
 
-
     sessionEndedRequest() {
         console.log("session end ");
         this.endDialog();
         return {
             outputSpeech: '多谢使用!'
         };
-
     }
 
 
@@ -309,8 +280,6 @@ class InquiryBot extends Bot {
             outputSpeech: '好的，重新开始。' + repromptText
         };
     }
-
-
 
     CommonIntent() {
         this.waitAnswer();  
