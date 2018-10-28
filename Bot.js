@@ -67,6 +67,30 @@ class InquiryBot extends Bot {
     }
 
     startNewGame() {
+
+//从数据库里面获得题库
+        let query_str ="SELECT id,content FROM hy_lwdy WHERE "+
+            "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM hy_lwdy))) ORDER BY id LIMIT 0,?";
+        let query_var=GAME_LENGTH;
+        let mysql_conn = ConnUtils.get_mysql_client();
+        mysql_conn.query(query_str,query_var,function (error, results, fields) {
+            if(error){
+                throw error;
+            }
+            for(var i = 0; i < results.length; i++)
+            {
+                console.log("%d\t%s\t%s", results[i].id, results[i].content);
+
+            }
+            for(var i = 0; i < questions.length; i++)
+            {
+                console.log("%s\t%s", questions[i][0], questions[i][1]);
+
+            }
+        }
+
+
+
         let questionsList = questions.QUESTIONS;
         let gameQuestions = this.populateGameQuestions(questionsList);
         let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
