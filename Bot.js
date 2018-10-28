@@ -13,7 +13,7 @@ const titleStr = '对诗李白';
 const PoemList = ["悯农","将进酒"];
 
 //定义一轮问答中的问题数量
-const GAME_LENGTH = 5;
+const GAME_LENGTH = 10;
 //定义每个问题的答案数量
 const ANSWER_COUNT = 3;
 
@@ -35,10 +35,8 @@ class InquiryBot extends Bot {
         this.addIntentHandler('Regis', this.register);
 
         //悯农
-        this.addIntentHandler('poem1', this.poem1Intent);
-
-        //将进酒
-        this.addIntentHandler('poem2', this.poem2Intent);
+        this.addIntentHandler('answer_intent', this.AnswerIntent);
+        this.addIntentHandler('newGame_intent', this.newGame);
 
         //缺省意图
         this.addIntentHandler('ai.dueros.common.default_intent', this.CommonIntent);
@@ -75,8 +73,8 @@ class InquiryBot extends Bot {
                     let repromptText = this.startNewGame();
                     let card = new Bot.Card.TextCard(repromptText);
     		        resolve({
-                        directives: [self.getTemplate1(results[0].username)],
-                        outputSpeech: speechOutput
+                        card: card,
+                        outputSpeech: speechOutput + repromptText
                         });
                 }else{
                     resolve({
@@ -91,7 +89,7 @@ class InquiryBot extends Bot {
     }
 
 
-  startNewGame() {
+    startNewGame() {
         let questionsList = questions.QUESTIONS;
         let gameQuestions = this.populateGameQuestions(questionsList);
         let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
@@ -116,6 +114,75 @@ class InquiryBot extends Bot {
     }
 
 
+  /**
+     *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
+     *  @param {list} translatedQuestions 所有问题列表
+     *  @return 问题id列表
+     */
+    populateGameQuestions(translatedQuestions) {
+        let gameQuestions = [];
+        let indexList = [];
+        let index = translatedQuestions.length;
+        if (GAME_LENGTH > index) {
+            throw new Error('Invalid Game Length.');
+        }
+
+        for (let i = 0; i < translatedQuestions.length; i += 1) {
+            indexList.push(i);
+        }
+
+        for (let j = 0; j < GAME_LENGTH; j += 1) {
+            let rand = Math.floor(Math.random() * index);
+            index -= 1;
+
+            let temp = indexList[index];
+            indexList[index] = indexList[rand];
+            indexList[rand] = temp;
+            gameQuestions.push(indexList[index]);
+        }
+        return gameQuestions;
+    }
+
+
+  /**
+     *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
+     *  @param {list} gameQuestionIndexes 一轮问答中问题id列表
+     *  @param {int} currentQuestionIndex 当前问题Index
+     *  @param {int} correctAnswerTargetLocation 当前问题答案Index
+     *  @param {list} translatedQuestions 所有问题列表
+     *  @return 当前问题答案选项列表
+     */
+    populateRoundAnswers(gameQuestionIndexes,currentQuestionIndex,correctAnswerTargetLocation,translatedQuestions) {
+        const answers = [];
+        const translatedQuestion = translatedQuestions[gameQuestionIndexes[currentQuestionIndex]];
+        const answersCopy = translatedQuestion[Object.keys(translatedQuestion)[0]].slice();
+        let index = answersCopy.length;
+
+        if (index < ANSWER_COUNT) {
+            throw new Error('Not enough answers for question.');
+        }
+
+          // 打乱当前问题答案列表顺序
+        for (let j = 1; j < answersCopy.length; j += 1) {
+            const rand = Math.floor(Math.random() * (index - 1)) + 1;
+            index -= 1;
+
+            const swapTemp1 = answersCopy[index];
+            answersCopy[index] = answersCopy[rand];
+            answersCopy[rand] = swapTemp1;
+        }
+
+          // 将正确答案放置到correctAnswerTargetLocation的位置
+        for (let i = 0; i < ANSWER_COUNT; i += 1) {
+            answers[i] = answersCopy[i];
+        }
+        const swapTemp2 = answers[0];
+        answers[0] = answers[correctAnswerTargetLocation];
+        answers[correctAnswerTargetLocation] = swapTemp2;
+        return answers;
+        }
+    }
+
     getTemplate1(text) {
     	console.log(text);
         let bodyTemplate = new Bot.Directive.Display.Template.BodyTemplate1();
@@ -128,9 +195,9 @@ class InquiryBot extends Bot {
 
     register(){
         this.waitAnswer();
-       let self=this;
+        let self=this;
         let userName = this.getSlot('username');
-	console.log('系统获得姓名'+userName);
+        console.log('系统获得姓名'+userName);
         if (!userName) {
             this.nlu.ask('username');
             let card = new Bot.Card.TextCard('你叫什么名字？');
@@ -140,7 +207,7 @@ class InquiryBot extends Bot {
                 outputSpeech: '你叫什么名字？'
             });
         }
-    
+
         let userId = this.request.getUserId();
         let insertQuery = "INSERT INTO hy_users (userid, username, score) VALUES (' " + userId + "','" + userName + "','0')";
         console.log(insertQuery);
@@ -154,6 +221,8 @@ class InquiryBot extends Bot {
             });
         });
     }
+
+
 
     sessionEndedRequest() {
         console.log("session end ");
@@ -170,47 +239,90 @@ class InquiryBot extends Bot {
      *
      * @return {Object}
      */
-    poem1Intent() {
+    AnswerIntent() {
         this.waitAnswer();
-        let poem11 = this.getSlot('1-1');
-        if(!poem11) {
-        //询问slot: 1-1
-            this.nlu.ask('1-1');
-            let speech="锄禾日当午";
-       //     let card = new TextCard('锄禾日当午');
+        let theAnswer = this.getSlot('theAnswer');
+        if (!theAnswer) {
+            this.nlu.ask('theAnswer');
             return {
-         //       card: card,
-                outputSpeech: speech,
-                reprompt: speech,             
+                outputSpeech: '您的答案是哪个？'
             };
         }
 
-        console.log("answer is right");
-        if (poem11) {      
-            let speech = '你答对了';                 
-            return {
-                outputSpeech: speech,
-            };
+        //获取session中相关信息
+        let questionsList = this.getSessionAttribute('questionsList');
+        let score = this.getSessionAttribute('score');
+        let currentQuestionIndex = this.getSessionAttribute('currentQuestionIndex');
+        let correctAnswerIndex = this.getSessionAttribute('correctAnswerIndex');
+        let gameQuestions = this.getSessionAttribute('gameQuestions');
+        let correctAnswerText = this.getSessionAttribute('correctAnswerText');
+        let speechOutput = '';
+
+        if (theAnswer == correctAnswerIndex){
+            score += 1;
+            speechOutput = '回答正确。目前正确：' + score + '题。';
+        }else{
+            speechOutput = '很遗憾，回答错误。正确答案是' + correctAnswerText + '.目前正确：' + score + '题。';
         }
 
+        if (currentQuestionIndex == GAME_LENGTH - 1){
+            speechOutput += '已经是最后一题了。您可以说重新开始来继续答题，或者说退出来退出技能。'
+            return {
+                outputSpeech: speechOutput
+            };
+        }
+            //获取下一题信息
+        currentQuestionIndex += 1;
+        correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+        let roundAnswers = this.populateRoundAnswers(gameQuestions, currentQuestionIndex,correctAnswerIndex,questionsList);
+        let questionIndexForSpeech = currentQuestionIndex + 1;
+        let repromptText = '第' + questionIndexForSpeech + '题：\n' + spokenQuestion + '\n';
+        for (let i = 0; i < ANSWER_COUNT; i += 1) {
+            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+        }
+        speechOutput += repromptText;
+        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+        this.setSessionAttribute('speechOutput',speechOutput);
+        this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+        this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+        this.setSessionAttribute('gameQuestions',gameQuestions);
+        this.setSessionAttribute('questionsList',questionsList);
+        this.setSessionAttribute('score',score);
+        this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+        let card = new Bot.Card.TextCard(repromptText);
+        return {
+            card: card,
+            outputSpeech: speechOutput
+        };
     }
+
+
+    //重新开始答题，得分清零
+    newGame()  {
+        this.waitAnswer();
+        //初始化一轮中的问题列表和第一题的话术
+        let repromptText =  this.startNewGame();
+        let card = new Bot.Card.TextCard(repromptText);
+        return {
+            card: card,
+            outputSpeech: '好的，重新开始。' + repromptText
+        };
+    }
+
+
 
     CommonIntent() {
         this.waitAnswer();  
-        console.log(this.request.getQuery());
-        
+        console.log(this.request.getQuery());      
         let speech = this.request.getQuery();
         let reprompt = this.request.getQuery();
 
         return {
             outputSpeech: speech,
             reprompt: reprompt,
-
         };
     }
-
-
-
 }
 
 
