@@ -35,7 +35,7 @@ class InquiryBot extends Bot {
         this.waitAnswer();
         let self=this;
         let userid=this.request.getUserId();
-	console.log('launch1:'+userid);
+	    console.log('launch1:'+userid);
     	let query_str ="SELECT username " +
     				"FROM hy_users " +
     				"WHERE (userid = ?) " +
@@ -44,9 +44,9 @@ class InquiryBot extends Bot {
         return new Promise(function (resolve, reject) {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                                  //初始化一轮中的问题列表和第一题的话术
-        	if(!error){
-                    let questionsList=self.startNewGame(function(){
+        	   if(!error){
+                        let questionsList=self.startNewGame()
+
                         console.log('startnew game 2');
                         let gameQuestions = this.populateGameQuestions(questionsList);
                         let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
@@ -66,13 +66,14 @@ class InquiryBot extends Bot {
                         this.setSessionAttribute('questionsList',questionsList);
                         this.setSessionAttribute('score',0);
                         this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-                        console.log(repromptText);
+                        console.log(questionsList);
 				 // return repromptText;
-                        });
+                }
+            });
                  
-		 let card = new Bot.Card.TextCard(repromptText);
-		 let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-    		 resolve({
+		    let card = new Bot.Card.TextCard(repromptText);
+		    let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
+    		resolve({
                         card: card,
                         outputSpeech: speechOutput + repromptText
                         });
@@ -108,7 +109,7 @@ class InquiryBot extends Bot {
             }
         });
       console.log('start new game');
-	return questionsList;          
+	  return questionsList;          
     }
 
   /**
