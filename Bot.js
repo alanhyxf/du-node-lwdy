@@ -67,21 +67,20 @@ class InquiryBot extends Bot {
                         this.setSessionAttribute('score',0);
                         this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
                         console.log(questionsList);
-				 // return repromptText;
-                }
-            });
+				       
+        
                  
-		    let card = new Bot.Card.TextCard(repromptText);
-		    let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-    		resolve({
-                        card: card,
-                        outputSpeech: speechOutput + repromptText
+		                let card = new Bot.Card.TextCard(repromptText);
+		                let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
+    		            resolve({
+                            card: card,
+                            outputSpeech: speechOutput + repromptText
                         });
                 }else{
-                    resolve({
-                        directives: [self.getTemplate1(results[0].name)],
-                        outputSpeech: '欢迎来到对诗李白。你还没登记账号呢吧。请发指令注册账号'
-                    });
+                        resolve({
+                            directives: [self.getTemplate1(results[0].name)],
+                            outputSpeech: '欢迎来到对诗李白。你还没登记账号呢吧。请发指令注册账号'
+                        });
                 }       
             });
         });
