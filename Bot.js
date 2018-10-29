@@ -48,10 +48,37 @@ class InquiryBot extends Bot {
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
                                   //初始化一轮中的问题列表和第一题的话术
                      
-                    let repromptText = self.startNewGame();
-                    let card = new Bot.Card.TextCard(repromptText);
+
+
+
+                );
+                let card = new Bot.Card.TextCard(repromptText);
     		    //if (typeof(results) != "undefined" && results.length > 0){
                 if(!error){
+                    let repromptText = self.startNewGame(function(){
+                        var questionsList=[];
+                        let gameQuestions = this.populateGameQuestions(questionsList);
+                        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+                        console.log(correctAnswerIndex);
+                        let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+                        let currentQuestionIndex = 0;
+                        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+                        let repromptText = '第1题：\n' + spokenQuestion + '\n';
+                        for (let i = 0; i < ANSWER_COUNT; i += 1) {
+                            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+                        }
+                    
+                        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+                    
+                        this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+                        this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+                        this.setSessionAttribute('gameQuestions',gameQuestions);
+                        this.setSessionAttribute('questionsList',questionsList);
+                        this.setSessionAttribute('score',0);
+                        this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+                        return repromptText;
+                        })
+                    }
                     let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
     		        resolve({
                         card: card,
@@ -67,30 +94,7 @@ class InquiryBot extends Bot {
         });
     }
 
-    startNewGame(function(){
-        var questionsList=[];
-        let gameQuestions = this.populateGameQuestions(questionsList);
-        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-        console.log(correctAnswerIndex);
-        let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
-        let currentQuestionIndex = 0;
-        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-        let repromptText = '第1题：\n' + spokenQuestion + '\n';
-        for (let i = 0; i < ANSWER_COUNT; i += 1) {
-            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
-        }
-    
-        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-    
-        this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-        this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-        this.setSessionAttribute('gameQuestions',gameQuestions);
-        this.setSessionAttribute('questionsList',questionsList);
-        this.setSessionAttribute('score',0);
-        this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-        return repromptText;
-
-    }) {
+    startNewGame(){
 
 //从数据库里面获得题库
         let query_str ="SELECT id,content FROM lwdy WHERE "+
@@ -111,7 +115,27 @@ class InquiryBot extends Bot {
     
             }
         });            
-            
+        var questionsList=[];
+        let gameQuestions = this.populateGameQuestions(questionsList);
+        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+        console.log(correctAnswerIndex);
+        let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+        let currentQuestionIndex = 0;
+        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+        let repromptText = '第1题：\n' + spokenQuestion + '\n';
+        for (let i = 0; i < ANSWER_COUNT; i += 1) {
+            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+        }
+    
+        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+    
+        this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+        this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+        this.setSessionAttribute('gameQuestions',gameQuestions);
+        this.setSessionAttribute('questionsList',questionsList);
+        this.setSessionAttribute('score',0);
+        this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+        return repromptText;           
 
     }
 
