@@ -40,8 +40,77 @@ class InquiryBot extends Bot {
         let self=this;
         let userid=this.request.getUserId();
 
+ 
+        function  getList(){
+            var questions=[];
+            let query_str ="SELECT id,content FROM lwdy WHERE "+
+                    "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
+            let query_var=GAME_LENGTH;
 
-        let repromptText=this.startNewGame();
+            return new Promise(function(resolve, reject) {
+                let mysql_conn = ConnUtils.get_mysql_client();
+                    mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                    if(error){
+                        reject(error)
+                    }else{
+				
+                        for(var i = 0; i < results.length; i++)
+                        {
+                            var str = results[i].content;
+                 
+                            var keys = str.split(/[;对 ；]/);
+                            for (var j = 0; j< keys.length; j++) {
+                                console.log(j,keys.length,keys[j]);
+                            }
+                            var key=keys[0];
+                            var obj={};
+                            obj[key]=[keys[1],keys[1],keys[1]];
+                            //obj[key]=keys[1];
+                            questions.push(obj);
+                        }
+                    resolve(questions);
+                    }
+                });
+            });
+        }
+
+
+
+
+        function setQuestionsList(questions)
+        {
+            console.log(questions);
+            let questionsList=questions;
+            let gameQuestions = self.populateGameQuestions(questionsList);
+            let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+            //console.log(correctAnswerIndex);
+            let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+            let currentQuestionIndex = 0;
+            let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+            let repromptText = '第1题：\n' + spokenQuestion + '\n';
+            for (let i = 0; i < ANSWER_COUNT; i += 1) {
+                repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+            }
+        
+            let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+            self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+            self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+            self.setSessionAttribute('gameQuestions',gameQuestions);
+            self.setSessionAttribute('questionsList',questionsList);
+            self.setSessionAttribute('score',0);
+            self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+           return repromptText;
+        }
+
+
+        var repromptText='';
+        var username='';    
+        getList()
+    	   .then(function (results) {
+    	        repromptText=setQuestionsList(results);	
+    	      //  console.log(repromptText);
+            });
+
 
         return new Promise(function (resolve, reject) {
             let query_str ="SELECT username " +
@@ -72,68 +141,8 @@ class InquiryBot extends Bot {
 
     }
 
-    startNewGame() {
-
-        return new Promise(function (resolve, reject) {
-            let query_str ="SELECT id,content FROM lwdy WHERE "+
-                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
-            let query_var=GAME_LENGTH;
-            let mysql_conn = ConnUtils.get_mysql_client();
-            mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if (!error){
-
-                    for(var i = 0; i < results.length; i++)
-                    {
-                        var str = results[i].content;
-             
-                        var keys = str.split(/[;对 ；]/);
-                        for (var j = 0; j< keys.length; j++) {
-                            console.log(j,keys.length,keys[j]);
-                        }
-                        var key=keys[0];
-                        var obj={};
-                        obj[key]=[keys[1],keys[1],keys[1]];
-                        //obj[key]=keys[1];
-                        questions.push(obj);
-                    }
-
-                    resolve(questions);
-                    return this.setQuestionsList(questions);
-
-                }else{
-                    reject(error);
- 
-                }
-            });
-        });
-    }
 
 
-
-    function setQuestionsList(questions)
-    {
-        console.log(questions);
-        let questionsList=questions;
-        let gameQuestions = self.populateGameQuestions(questionsList);
-        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-        //console.log(correctAnswerIndex);
-        let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
-        let currentQuestionIndex = 0;
-        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-        let repromptText = '第1题：\n' + spokenQuestion + '\n';
-        for (let i = 0; i < ANSWER_COUNT; i += 1) {
-            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
-        }
-    
-        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-        self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-        self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-        self.setSessionAttribute('gameQuestions',gameQuestions);
-        self.setSessionAttribute('questionsList',questionsList);
-        self.setSessionAttribute('score',0);
-        self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-       return repromptText;
-    }
   /**
      *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
      *  @param {list} translatedQuestions 所有问题列表
