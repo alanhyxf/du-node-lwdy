@@ -285,26 +285,26 @@ class InquiryBot extends Bot {
         }
 
         if (currentQuestionIndex == GAME_LENGTH - 1){
-            speechOutput += '已经是最后一题了。您可以说重新开始来继续答题，或者说退出来退出技能。' 
+         //   speechOutput += '已经是最后一题了。您可以说重新开始来继续答题，或者说退出来退出技能。' 
             if (score<5)
             {
-                speechOutput += '您答对题目数量不多，要名落孙山了。您可以重新开始来继续答题，或者说退出来退出技能。'；
+                speechOutput += '您答对题目数量不多，要名落孙山了。您可以重新开始来继续答题，或者说退出来退出技能。'
             } 
             else if (score==5 || score==6)
             {
-                speechOutput += '您获得秀才称号。您可以重新开始来继续答题，或者说退出来退出技能。'；
+                speechOutput += '您获得秀才称号。您可以重新开始来继续答题，或者说退出来退出技能。'
             } 
             else if (score==7 || score==8)
             {
-                speechOutput += '您获得举人称号。您可以重新开始来继续答题，或者说退出来退出技能。'；
+                speechOutput += '您获得举人称号。您可以重新开始来继续答题，或者说退出来退出技能。'
             } 
             else if (score==9)
             {
-                speechOutput += '您获得进士称号。您可以重新开始来继续答题，或者说退出来退出技能。'；
+                speechOutput += '您获得进士称号。您可以重新开始来继续答题，或者说退出来退出技能。'
             } 
             else if (score==10)
             {
-                speechOutput += '恭喜，您获得状元称号。您可以重新开始来继续答题，或者说退出来退出技能。'；
+                speechOutput += '恭喜，您获得状元称号。您可以重新开始来继续答题，或者说退出来退出技能。'
             } 
 
             return {
@@ -333,7 +333,7 @@ class InquiryBot extends Bot {
         let card = new Bot.Card.TextCard(repromptText);
         console.log(repromptText)
         return {
-             directives: [self.getTemplate1(titleStr,repromptText,defaultBkg)],
+             directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],
             outputSpeech: speechOutput
         };
     }
@@ -352,7 +352,7 @@ class InquiryBot extends Bot {
 
       // let card = new Bot.Card.TextCard(repromptText);
         return {
-              directives: [self.getTemplate1(titleStr,repromptText,defaultBkg)],
+              directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],
             outputSpeech: '好的，重新开始。' + repromptText
         };
     }
