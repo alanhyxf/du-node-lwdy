@@ -32,105 +32,96 @@ class InquiryBot extends Bot {
         this.addDefaultEventListener(this.defaultEvent);
     }
 
+
+    function  getList(){
+        var questions=[];
+        let query_str ="SELECT id,content FROM lwdy WHERE "+
+                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
+        let query_var=GAME_LENGTH;
+
+        return new Promise(function(resolve, reject) {
+            let mysql_conn = ConnUtils.get_mysql_client();
+                mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                if(error){
+                    reject(error)
+                }else{
+                    for(var i = 0; i < results.length; i++)
+                    {
+                        console.log("%d\t%s\t%s", results[i].id, results[i].content);
+                        var key=results[i].content;
+                        var obj={};
+                        obj[key]=['a','b','c'];
+                        questions.push(obj);
+                    }
+                resolve(questions);
+                }
+            });
+        });
+    }
+
+
+    function getUser(userid){
+        console.log('getuser');
+        let query_str ="SELECT username " +
+                    "FROM hy_users " +
+                    "WHERE (userid = ?) " +
+                    "LIMIT 1 ";
+        let query_var=userid;
+        
+        return new Promise(function(resolve,reject){
+            let mysql_conn = ConnUtils.get_mysql_client();
+            mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                if(!error){
+                    console.log(results[0].username);
+                    resolve(results[0].username);
+                }else{
+                    reject(error)
+                }
+            });
+        });
+    }
+
+
+    function setQuestionsList(questions)
+    {
+        console.log(questions);
+        let questionsList=questions;
+        let gameQuestions = self.populateGameQuestions(questionsList);
+        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+        console.log(correctAnswerIndex);
+        let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+        let currentQuestionIndex = 0;
+        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+        let repromptText = '第1题：\n' + spokenQuestion + '\n';
+        for (let i = 0; i < ANSWER_COUNT; i += 1) {
+            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+        }
+    
+        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+        self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+        self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+        self.setSessionAttribute('gameQuestions',gameQuestions);
+        self.setSessionAttribute('questionsList',questionsList);
+        self.setSessionAttribute('score',0);
+        self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+    }
+
+
     launch() {
         this.waitAnswer();
         let self=this;
         let userid=this.request.getUserId();
 
-
-        function  getList(){
-            var questions=[];
-            let query_str ="SELECT id,content FROM lwdy WHERE "+
-                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
-            let query_var=GAME_LENGTH;
-	    
-	    return new Promise(function(resolve, reject) {
-            	let mysql_conn = ConnUtils.get_mysql_client();
-            	mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if(error){
-                    	reject(error)
-                }else{
-
-                	for(var i = 0; i < results.length; i++)
-                	{
-                    	console.log("%d\t%s\t%s", results[i].id, results[i].content);
-                    	var key=results[i].content;
-                    	var obj={};
-                    	obj[key]=['a','b','c'];
-                    	questions.push(obj);
-                	}
-			resolve(questions);
-	
-		}
-  
-               });
-           });
-	}
-
-
-        function getUser(userid){
-            console.log('getuser');
-            let query_str ="SELECT username " +
-                        "FROM hy_users " +
-                        "WHERE (userid = ?) " +
-                        "LIMIT 1 ";
-            let query_var=userid;
-            let mysql_conn = ConnUtils.get_mysql_client();
-            mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if(!error){
-                    console.log(results[0].username);
-                    return results[0].username;
-                }
-            });
-        }
-
-
-
-
-           // var questionsList=getQuestionsList();
-        function setQuestionsList(questions)
-	{
-	    console.log(questions);
-	    let questionsList=questions;
-            let gameQuestions = this.populateGameQuestions(questionsList);
-            let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-            console.log(correctAnswerIndex);
-            let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
-            let currentQuestionIndex = 0;
-            let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-            let repromptText = '第1题：\n' + spokenQuestion + '\n';
-            for (let i = 0; i < ANSWER_COUNT; i += 1) {
-                repromptText += `${i + 1}. ${roundAnswers[i]}. `;
-            }
-        
-            let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-            this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-            this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-            this.setSessionAttribute('gameQuestions',gameQuestions);
-            this.setSessionAttribute('questionsList',questionsList);
-            this.setSessionAttribute('score',0);
-            this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-         }
- 
-       var that=this; 
        getList()
-	.then(function (results) {
-	     that.setSessionAttribute('questionsList',results);	
-	
+	   .then(function (results) {
+	       setQuestionsList(results);	
+        })
+       getUser(userid)
+       .then(function(value){
+           console.log(value);
+       })
 
-
-
-
-
-
-
-
-
-})
-		
-	
-
- }
+    }
 
 
 /*
