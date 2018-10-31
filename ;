@@ -5,12 +5,11 @@
 const Bot = require('bot-sdk');
 let ConnUtils = require('./tools/ConnUtils');
 const privateKey = require("./rsaKeys.js").privateKey;
-//const questions = require('./questions');
-var Q=require('q');
-var defer=Q.defer();
+const questions = require('./questions');
+
 
 //定义一轮问答中的问题数量
-const GAME_LENGTH = 10;
+const GAME_LENGTH = 5;
 //定义每个问题的答案数量
 const ANSWER_COUNT = 3;
 
@@ -36,122 +35,88 @@ class InquiryBot extends Bot {
         this.waitAnswer();
         let self=this;
         let userid=this.request.getUserId();
-
-
-        function  getList(){
-            var questions=[];
-            let query_str ="SELECT id,content FROM lwdy WHERE "+
-                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
-            let query_var=GAME_LENGTH;
-	    
-	    return new Promise(function(resolve, reject) {
-            	let mysql_conn = ConnUtils.get_mysql_client();
-            	mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if(error){
-                    	reject(error)
-                }else{
-
-                	for(var i = 0; i < results.length; i++)
-                	{
-                    	console.log("%d\t%s\t%s", results[i].id, results[i].content);
-                    	var key=results[i].content;
-                    	var obj={};
-                    	obj[key]=['a','b','c'];
-                    	questions.push(obj);
-                	}
-			resolve(questions);
-	
-		}
-  
-               });
-           });
-	}
-
-
-        function getUser(userid){
-            console.log('getuser');
-            let query_str ="SELECT username " +
-                        "FROM hy_users " +
-                        "WHERE (userid = ?) " +
-                        "LIMIT 1 ";
-            let query_var=userid;
+	    console.log('launch1:'+userid);
+    	let query_str ="SELECT username " +
+    				"FROM hy_users " +
+    				"WHERE (userid = ?) " +
+    				"LIMIT 1 ";
+        let query_var=userid;
+        return new Promise(function (resolve, reject) {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if(!error){
-                    console.log(results[0].username);
-                    return results[0].username;
-                }
-            });
-        }
+        	   if(!error){
+                        let questionsList=self.startNewGame();
+  			console.log(questionsList.length);
 
-
-
-
-           // var questionsList=getQuestionsList();
-        function setQuestionsList(questions)
-	{
-	    console.log(questions);
-	    let questionsList=questions;
-            let gameQuestions = this.populateGameQuestions(questionsList);
-            let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-            console.log(correctAnswerIndex);
-            let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
-            let currentQuestionIndex = 0;
-            let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-            let repromptText = '第1题：\n' + spokenQuestion + '\n';
-            for (let i = 0; i < ANSWER_COUNT; i += 1) {
-                repromptText += `${i + 1}. ${roundAnswers[i]}. `;
-            }
+                        let gameQuestions = self.populateGameQuestions(questionsList);
+                        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+                        //console.log(correctAnswerIndex);
+                        let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+                        let currentQuestionIndex = 0;
+                        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+                        let repromptText = '第1题：\n' + spokenQuestion + '\n';
+                        for (let i = 0; i < ANSWER_COUNT; i += 1) {
+                            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+                        }
+                    
+                        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+                        this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+                        this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+                        this.setSessionAttribute('gameQuestions',gameQuestions);
+                        //this.setSessionAttribute('questionsList',questionsList);
+                        this.setSessionAttribute('score',0);
+                        this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+                        console.log(questionsList);
+				       
         
-            let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-            this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-            this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-            this.setSessionAttribute('gameQuestions',gameQuestions);
-            this.setSessionAttribute('questionsList',questionsList);
-            this.setSessionAttribute('score',0);
-            this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-         }
- 
-       var that=this; 
-       getList()
-	.then(function (results) {
-	     that.setSessionAttribute('questionsList',results);	
-	
-
-
-
-
-
-
-
-
-
-})
-		
-	
-
- }
-
-
-/*
-            console.log(questionsList);
-        }).then(function()
-        {
-            let card = new Bot.Card.TextCard(repromptText);
-            let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-            resolve({
-                card: card,
-                outputSpeech: speechOutput + repromptText
+                 
+		                let card = new Bot.Card.TextCard(repromptText);
+		                let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
+    		            resolve({
+                            card: card,
+                            outputSpeech: speechOutput + repromptText
+                        });
+                }else{
+                        resolve({
+                            directives: [self.getTemplate1(results[0].name)],
+                            outputSpeech: '欢迎来到对诗李白。你还没登记账号呢吧。请发指令注册账号'
+                        });
+                }       
             });
-
         });
-
-        defer.resolve(userid);
-
     }
-    */
 
-
+    startNewGame(){
+	var questionsList=[];
+//从数据库里面获得题库
+        let query_str ="SELECT id,content FROM lwdy WHERE "+
+            "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
+        let query_var=GAME_LENGTH;
+        let mysql_conn = ConnUtils.get_mysql_client();
+        var promise=new Promise(function(resolve,reject){
+		mysql_conn.query(query_str,query_var,function (error, results, fields) {
+            	console.log('result length',results.length);
+            	if(error){
+                	throw error;
+            	}
+		else
+		{
+			resolve(
+              			for(var i = 0; i < results.length; i++)
+                		{
+                        	console.log("%d\t%s\t%s", results[i].id, results[i].content);
+                        	var key=results[i].content;
+                        	var obj={};
+                        	obj[key]=['a','b','c'];
+                        	questionsList.push(obj);
+                		}
+ 				this.setSessionAttribute('questionsList',questionsList);	
+				console.log('questionlist length',questionsList.length);
+			);
+		}
+        });
+	return questionsList;
+    }
 
   /**
      *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
@@ -162,6 +127,7 @@ class InquiryBot extends Bot {
         let gameQuestions = [];
         let indexList = [];
         let index = translatedQuestions.length;
+        console.log(index,GAME_LENGTH);
         if (GAME_LENGTH > index) {
             throw new Error('Invalid Game Length.');
         }
