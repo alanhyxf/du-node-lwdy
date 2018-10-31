@@ -91,9 +91,9 @@ class InquiryBot extends Bot {
                         var str = results[i].content;
              
                         var keys = str.split(/[;对 ；]/);
-                        for (var j = 0; j< keys.length; j++) {
-                            console.log(j,keys.length,keys[j]);
-                        }
+ //                       for (var j = 0; j< keys.length; j++) {
+ //                           console.log(j,keys.length,keys[j]);
+ //                       }
                         var key=keys[0];
                         var obj={};
                         obj[key]=[keys[1],keys[1],keys[1]];
@@ -307,6 +307,8 @@ class InquiryBot extends Bot {
 
         if (currentQuestionIndex == GAME_LENGTH - 1){
             speechOutput += '已经是最后一题了。您可以说重新开始来继续答题，或者说退出来退出技能。'
+
+
             return {
                 outputSpeech: speechOutput
             };
