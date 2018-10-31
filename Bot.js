@@ -53,17 +53,17 @@ class InquiryBot extends Bot {
                     if(error){
                         reject(error)
                     }else{
+				
                         for(var i = 0; i < results.length; i++)
                         {
-                            console.log("%d\t%s\t", results[i].id, results[i].content);
+                          //  console.log("%d\t%s\t", results[i].id, results[i].content);
 
                             var str = results[i].content;
                     
-                            var strAry = str.split(/[,，;对 ]/);
-                            for (i = 0; i < strAry.length; i++) {
-                                console.log(strAry[i]);
+                            var keys = str.split(/[;对 ；]/);
+                            for (var j = 0; j< keys.length; j++) {
+                                console.log(j,keys.length,keys[j]);
                             }
-                            var keys=results[i].split(";");
                             var key=keys[0];
                             var obj={};
                             obj[key]=[keys[1],keys[1],keys[1]];
