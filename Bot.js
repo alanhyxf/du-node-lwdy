@@ -33,6 +33,14 @@ class InquiryBot extends Bot {
     }
 
 
+
+
+    launch() {
+        this.waitAnswer();
+        let self=this;
+        let userid=this.request.getUserId();
+
+ 
     function  getList(){
         var questions=[];
         let query_str ="SELECT id,content FROM lwdy WHERE "+
@@ -107,11 +115,7 @@ class InquiryBot extends Bot {
     }
 
 
-    launch() {
-        this.waitAnswer();
-        let self=this;
-        let userid=this.request.getUserId();
-
+    
        getList()
 	   .then(function (results) {
 	       setQuestionsList(results);	
@@ -119,7 +123,7 @@ class InquiryBot extends Bot {
        getUser(userid)
        .then(function(value){
            console.log(value);
-       })
+       });
 
     }
 
@@ -185,7 +189,7 @@ class InquiryBot extends Bot {
         const answers = [];
         const translatedQuestion = translatedQuestions[gameQuestionIndexes[currentQuestionIndex]];
         const answersCopy = translatedQuestion[Object.keys(translatedQuestion)[0]].slice();
-	let index = answersCopy.length;
+	    let index = answersCopy.length;
 
         if (index < ANSWER_COUNT) {
             throw new Error('Not enough answers for question.');
