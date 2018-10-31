@@ -56,7 +56,14 @@ class InquiryBot extends Bot {
                         for(var i = 0; i < results.length; i++)
                         {
                             console.log("%d\t%s\t", results[i].id, results[i].content);
-                            var keys=results[i].split(";")
+
+                            var str = results[i].content;
+                    
+                            var strAry = str.split(/[,，;对 ]/);
+                            for (i = 0; i < strAry.length; i++) {
+                                console.log(strAry[i]);
+                            }
+                            var keys=results[i].split(";");
                             var key=keys[0];
                             var obj={};
                             obj[key]=[keys[1],keys[1],keys[1]];
@@ -120,8 +127,8 @@ class InquiryBot extends Bot {
         getList()
     	   .then(function (results) {
     	        repromptText=setQuestionsList(results);	
-    	        //console.log(repromptText);});
-                getUser(userid)
+    	        console.log(repromptText);});
+        getUser(userid)
            .then(function(value){
                console.log(repromptText);
     	       let card=new Bot.Card.TextCard(repromptText);
