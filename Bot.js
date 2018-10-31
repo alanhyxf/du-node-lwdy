@@ -32,22 +32,18 @@ class InquiryBot extends Bot {
         this.addDefaultEventListener(this.defaultEvent);
     }
 
-
-
-
-
     launch() {
         this.waitAnswer();
         let self=this;
         let userid=this.request.getUserId();
+        console.log
 
-
-        function StartGame(){
+        var StartGame=function(){
             return defer.promise;
         }
 
 
-        function getQuestionsList(){
+        var getQuestionsList=function(){
             var questionsList=[];
     //从数据库里面获得题库
             let query_str ="SELECT id,content FROM lwdy WHERE "+
@@ -68,12 +64,12 @@ class InquiryBot extends Bot {
         
                 }
             });
-            return questionsList;
-
+            this.setSessionAttribute('questionsList',questionsList);
+            return defer.promise;
         }
 
 
-        function getUser(userid){
+        var getUser=function(userid){
             let query_str ="SELECT username " +
                         "FROM hy_users " +
                         "WHERE (userid = ?) " +
@@ -82,17 +78,15 @@ class InquiryBot extends Bot {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
                 if(!error){
-                    return results[0].username;
+                    console.log(results[0].username);
                 }
             });
+            return defer.promise;
         }
 
-        StartGame().then(function(userid){
-            return getUser(userid);
-        }).then(function()
+        var AttributeSet=function()
         {
-            var questionsList=getQuestionList()
-            let gameQuestions = this.populateGameQuestions(questionsList);
+           let gameQuestions = this.populateGameQuestions(questionsList);
             let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
             console.log(correctAnswerIndex);
             let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
@@ -110,6 +104,12 @@ class InquiryBot extends Bot {
             this.setSessionAttribute('questionsList',questionsList);
             this.setSessionAttribute('score',0);
             this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+            return defer.promise;
+        }
+
+        StartGame().then(getUser(userid)).then(getQuestionsList()).(console.log,console.error);
+   }
+/*
             console.log(questionsList);
         }).then(function()
         {
@@ -125,6 +125,7 @@ class InquiryBot extends Bot {
         defer.resolve(userid);
 
     }
+    */
 
 
 
