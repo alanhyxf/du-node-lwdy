@@ -64,8 +64,8 @@ class InquiryBot extends Bot {
                             }
                             var key=keys[0];
                             var obj={};
-                            //obj[key]=[keys[1],keys[1],keys[1]];
-                            obj[key]=keys[1];
+                            obj[key]=[keys[1],keys[1],keys[1]];
+                            //obj[key]=keys[1];
                             questions.push(obj);
                         }
                     resolve(questions);
@@ -126,7 +126,8 @@ class InquiryBot extends Bot {
         getList()
     	   .then(function (results) {
     	        repromptText=setQuestionsList(results);	
-    	        //console.log(repromptText);});
+    	      //  console.log(repromptText);
+            });
         getUser(userid)
            .then(function(value){
                console.log('repromptText',repromptText);
