@@ -97,8 +97,27 @@ class InquiryBot extends Bot {
                         questions.push(obj);
                     }
 
-                    resolve(questions);
-                    return this.setQuestionsList(questions);
+                    
+                    let questionsList=questions;
+                    let gameQuestions = self.populateGameQuestions(questionsList);
+                    let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+                    //console.log(correctAnswerIndex);
+                    let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+                    let currentQuestionIndex = 0;
+                    let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+                    let repromptText = '第1题：\n' + spokenQuestion + '\n';
+                    for (let i = 0; i < ANSWER_COUNT; i += 1) {
+                        repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+                    }
+                
+                    let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+                    self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+                    self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+                    self.setSessionAttribute('gameQuestions',gameQuestions);
+                    self.setSessionAttribute('questionsList',questionsList);
+                    self.setSessionAttribute('score',0);
+                    self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+                    resolve(repromptText);
 
                 }else{
                     reject(error);
@@ -110,7 +129,7 @@ class InquiryBot extends Bot {
 
 
 
-    function setQuestionsList(questions)
+    setQuestionsList(questions)
     {
         console.log(questions);
         let questionsList=questions;
