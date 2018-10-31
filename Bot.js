@@ -2,6 +2,10 @@
   * @file js-sdk bot demo
   * @author yelvye@baidu.com
   */
+ 
+const defaultBkg = 'http://dbp-resource.gz.bcebos.com/92bb7de1-5d92-dab4-9c39-84c1998470a3/default.jpg?authorization=bce-auth-v1%2Fa4d81bbd930c41e6857b989362415714%2F2018-10-17T14%3A47%3A46Z%2F-1%2F%2Fcf2a0f8ff98250a2a00e592bb42b5f1d2d001e6ff96e24320548e5932615d0b0';
+const titleStr = '笠翁对韵';
+
 const Bot = require('bot-sdk');
 let ConnUtils = require('./tools/ConnUtils');
 const privateKey = require("./rsaKeys.js").privateKey;
@@ -58,10 +62,10 @@ class InquiryBot extends Bot {
                     let username=results[0].username;
                     let speechOutput = '欢迎来到笠翁对韵。我将念上句，请你回答下句。';
                      console.log('username,repromptText',username,repromptText);
-                    let card = new Bot.Card.TextCard(repromptText);
+                    //let card = new Bot.Card.TextCard(repromptText);
                     resolve({
-                        //directives: [self.getTemplate1(username)],
-                        card:card,
+                        directives: [self.getTemplate1(titleStr,speechOutput,defaultBkg)],
+                        //card:card,
                         outputSpeech: speechOutput +  repromptText
                     });
                 }else{
@@ -133,31 +137,6 @@ class InquiryBot extends Bot {
 
 
 
-    setQuestionsList(questions)
-    {
-        let self=this;
-        console.log(questions);
-        let questionsList=questions;
-        let gameQuestions = self.populateGameQuestions(questionsList);
-        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-        //console.log(correctAnswerIndex);
-        let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
-        let currentQuestionIndex = 0;
-        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-        let repromptText = '第1题：\n' + spokenQuestion + '\n';
-        for (let i = 0; i < ANSWER_COUNT; i += 1) {
-            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
-        }
-    
-        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-        self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-        self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-        self.setSessionAttribute('gameQuestions',gameQuestions);
-        self.setSessionAttribute('questionsList',questionsList);
-        self.setSessionAttribute('score',0);
-        self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-       return repromptText;
-    }
   /**
      *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
      *  @param {list} translatedQuestions 所有问题列表
@@ -354,7 +333,7 @@ class InquiryBot extends Bot {
         let card = new Bot.Card.TextCard(repromptText);
         console.log(repromptText)
         return {
-            card: card,
+             directives: [self.getTemplate1(titleStr,repromptText,defaultBkg)],
             outputSpeech: speechOutput
         };
     }
@@ -364,10 +343,16 @@ class InquiryBot extends Bot {
     newGame()  {
         this.waitAnswer();
         //初始化一轮中的问题列表和第一题的话术
-        let repromptText =  this.startNewGame();
-        let card = new Bot.Card.TextCard(repromptText);
+ 
+
+        this.startNewGame().then((value)=>
+        {      console.log(value);
+             repromptText=value;}
+       );
+
+      // let card = new Bot.Card.TextCard(repromptText);
         return {
-            card: card,
+              directives: [self.getTemplate1(titleStr,repromptText,defaultBkg)],
             outputSpeech: '好的，重新开始。' + repromptText
         };
     }
@@ -379,7 +364,7 @@ class InquiryBot extends Bot {
         let reprompt = this.request.getQuery();
 
         return {
-            outputSpeech: speech,
+          //  outputSpeech: speech,
             reprompt: reprompt,
         };
     }
