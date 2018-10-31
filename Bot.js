@@ -56,17 +56,16 @@ class InquiryBot extends Bot {
 				
                         for(var i = 0; i < results.length; i++)
                         {
-                          //  console.log("%d\t%s\t", results[i].id, results[i].content);
-
                             var str = results[i].content;
-                    
+                 
                             var keys = str.split(/[;对 ；]/);
                             for (var j = 0; j< keys.length; j++) {
                                 console.log(j,keys.length,keys[j]);
                             }
                             var key=keys[0];
                             var obj={};
-                            obj[key]=[keys[1],keys[1],keys[1]];
+                            //obj[key]=[keys[1],keys[1],keys[1]];
+                            obj[key]=keys[1];
                             questions.push(obj);
                         }
                     resolve(questions);
@@ -127,10 +126,10 @@ class InquiryBot extends Bot {
         getList()
     	   .then(function (results) {
     	        repromptText=setQuestionsList(results);	
-    	        console.log(repromptText);});
+    	        //console.log(repromptText);});
         getUser(userid)
            .then(function(value){
-               console.log(repromptText);
+               console.log('repromptText',repromptText);
     	       let card=new Bot.Card.TextCard(repromptText);
                let speechOutput = '欢迎你' + value + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
                console.log(speechOutput);
