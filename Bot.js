@@ -120,15 +120,19 @@ class InquiryBot extends Bot {
             let query_var=userid;
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if (typeof(results) != "undefined" && results.length > 0){
+                if (!error){
                     username=results[0].name;
+                    let speechOutput = '欢迎来到笠翁对韵。我将念上句，请你回答下句。准备好了就请说开始测试';
+                     console.log('username,repromptText',username,repromptText);
+                    let card = new Bot.Card.TextCard(repromptText);
                     resolve({
-                        directives: [self.getTemplate1(results[0].name)],
-                        outputSpeech: '欢迎你' + username +  repromptText
+                        //directives: [self.getTemplate1(username)],
+                        card:card,
+                        outputSpeech: speechOutput +  repromptText
                     });
                 }else{
                     resolve({
-                        directives: [self.getTemplate1(results[0].name)],
+                        //directives: [self.getTemplate1(username)],
                         outputSpeech: '你好，你叫什么名字？'
                     });
                 }
