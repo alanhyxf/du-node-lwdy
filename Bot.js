@@ -102,7 +102,7 @@ class InquiryBot extends Bot {
             let questionsList=questions;
             let gameQuestions = self.populateGameQuestions(questionsList);
             let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-            console.log(correctAnswerIndex);
+            //console.log(correctAnswerIndex);
             let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
             let currentQuestionIndex = 0;
             let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
@@ -131,17 +131,15 @@ class InquiryBot extends Bot {
             });
         getUser(userid)
            .then(function(value){
-               username=value;
-               let card=new Bot.Card.TextCard(repromptText);
-               let speechOutput = '欢迎你' + username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-               console.log(speechOutput);
-               return {
-                            card: card,
-                            outputSpeech: speechOutput + repromptText
-               };
-               console.log('1');   
+               username=value;               
     	   });
-           console.log('2');
+       let card=new Bot.Card.TextCard(repromptText);
+       let speechOutput = '欢迎你,' + username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
+       console.log(speechOutput);
+       return {
+                card: card,
+                outputSpeech: speechOutput + repromptText
+       };   
 
     }
 
