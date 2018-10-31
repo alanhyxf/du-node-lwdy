@@ -41,98 +41,97 @@ class InquiryBot extends Bot {
         let userid=this.request.getUserId();
 
  
-    function  getList(){
-        var questions=[];
-        let query_str ="SELECT id,content FROM lwdy WHERE "+
-                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
-        let query_var=GAME_LENGTH;
+        function  getList(){
+            var questions=[];
+            let query_str ="SELECT id,content FROM lwdy WHERE "+
+                    "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
+            let query_var=GAME_LENGTH;
 
-        return new Promise(function(resolve, reject) {
-            let mysql_conn = ConnUtils.get_mysql_client();
-                mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if(error){
-                    reject(error)
-                }else{
-                    for(var i = 0; i < results.length; i++)
-                    {
-                        console.log("%d\t%s\t", results[i].id, results[i].content);
-                        var key=results[i].content;
-                        var obj={};
-                        obj[key]=['a','b','c'];
-                        questions.push(obj);
+            return new Promise(function(resolve, reject) {
+                let mysql_conn = ConnUtils.get_mysql_client();
+                    mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                    if(error){
+                        reject(error)
+                    }else{
+                        for(var i = 0; i < results.length; i++)
+                        {
+                            console.log("%d\t%s\t", results[i].id, results[i].content);
+                            var keys=results[i].split(";")
+                            var key=keys[0];
+                            var obj={};
+                            obj[key]=[keys[1],keys[1],keys[1]];
+                            questions.push(obj);
+                        }
+                    resolve(questions);
                     }
-                resolve(questions);
-                }
+                });
             });
-        });
-    }
-
-
-    function getUser(userid){
-        console.log('getuser');
-        let query_str ="SELECT username " +
-                    "FROM hy_users " +
-                    "WHERE (userid = ?) " +
-                    "LIMIT 1 ";
-        let query_var=userid;
-        
-        return new Promise(function(resolve,reject){
-            let mysql_conn = ConnUtils.get_mysql_client();
-            mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if(!error){
-                    resolve(results[0].username);
-                }else{
-                    reject(error)
-                }
-            });
-        });
-    }
-
-
-    function setQuestionsList(questions)
-    {
-        console.log(questions);
-        let questionsList=questions;
-        let gameQuestions = self.populateGameQuestions(questionsList);
-        let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-        console.log(correctAnswerIndex);
-        let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
-        let currentQuestionIndex = 0;
-        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-        let repromptText = '第1题：\n' + spokenQuestion + '\n';
-        for (let i = 0; i < ANSWER_COUNT; i += 1) {
-            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
         }
-    
-        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-        self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-        self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-        self.setSessionAttribute('gameQuestions',gameQuestions);
-        self.setSessionAttribute('questionsList',questionsList);
-        self.setSessionAttribute('score',0);
-        self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-       return repromptText;
-    }
 
 
-       var repromptText='';    
-       getList()
-	   .then(function (results) {
-	       repromptText=setQuestionsList(results);	
-	console.log(repromptText);
-        });
-       getUser(userid)
-       .then(function(value){
-           console.log(repromptText);
-	   let card=new Bot.Card.TextCard(repromptText);
-           let speechOutput = '欢迎你' + value + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-           console.log(speechOutput);
-           return {
-                card: card,
-                outputSpeech: speechOutput + repromptText
-            };
-	});
+        function getUser(userid){
+            console.log('getuser');
+            let query_str ="SELECT username " +
+                        "FROM hy_users " +
+                        "WHERE (userid = ?) " +
+                        "LIMIT 1 ";
+            let query_var=userid;
+            
+            return new Promise(function(resolve,reject){
+                let mysql_conn = ConnUtils.get_mysql_client();
+                mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                    if(!error){
+                        resolve(results[0].username);
+                    }else{
+                        reject(error)
+                    }
+                });
+            });
+        }
 
+
+        function setQuestionsList(questions)
+        {
+            console.log(questions);
+            let questionsList=questions;
+            let gameQuestions = self.populateGameQuestions(questionsList);
+            let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
+            console.log(correctAnswerIndex);
+            let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+            let currentQuestionIndex = 0;
+            let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
+            let repromptText = '第1题：\n' + spokenQuestion + '\n';
+            for (let i = 0; i < ANSWER_COUNT; i += 1) {
+                repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+            }
+        
+            let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
+            self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+            self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
+            self.setSessionAttribute('gameQuestions',gameQuestions);
+            self.setSessionAttribute('questionsList',questionsList);
+            self.setSessionAttribute('score',0);
+            self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+           return repromptText;
+        }
+
+
+        var repromptText='';    
+        getList()
+    	   .then(function (results) {
+    	        repromptText=setQuestionsList(results);	
+    	        //console.log(repromptText);});
+                getUser(userid)
+           .then(function(value){
+               console.log(repromptText);
+    	       let card=new Bot.Card.TextCard(repromptText);
+               let speechOutput = '欢迎你' + value + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
+               console.log(speechOutput);
+               return {
+                    card: card,
+                    outputSpeech: speechOutput + repromptText
+                };
+    	   });
     }
 
 
