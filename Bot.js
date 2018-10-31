@@ -55,7 +55,7 @@ class InquiryBot extends Bot {
                 }else{
                     for(var i = 0; i < results.length; i++)
                     {
-                        console.log("%d\t%s\t%s", results[i].id, results[i].content);
+                        console.log("%d\t%s\t", results[i].id, results[i].content);
                         var key=results[i].content;
                         var obj={};
                         obj[key]=['a','b','c'];
@@ -80,7 +80,6 @@ class InquiryBot extends Bot {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
                 if(!error){
-                    console.log(results[0].username);
                     resolve(results[0].username);
                 }else{
                     reject(error)
@@ -97,7 +96,7 @@ class InquiryBot extends Bot {
         let gameQuestions = self.populateGameQuestions(questionsList);
         let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
         console.log(correctAnswerIndex);
-        let roundAnswers = this.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
+        let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
         let currentQuestionIndex = 0;
         let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
         let repromptText = '第1题：\n' + spokenQuestion + '\n';
@@ -112,39 +111,29 @@ class InquiryBot extends Bot {
         self.setSessionAttribute('questionsList',questionsList);
         self.setSessionAttribute('score',0);
         self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
+       return repromptText;
     }
 
 
-    
+       var repromptText='';    
        getList()
 	   .then(function (results) {
-	       setQuestionsList(results);	
-        })
+	       repromptText=setQuestionsList(results);	
+	console.log(repromptText);
+        });
        getUser(userid)
        .then(function(value){
-           console.log(value);
-       });
-
-    }
-
-
-/*
-            console.log(questionsList);
-        }).then(function()
-        {
-            let card = new Bot.Card.TextCard(repromptText);
-            let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-            resolve({
+           console.log(repromptText);
+	   let card=new Bot.Card.TextCard(repromptText);
+           let speechOutput = '欢迎你' + value + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
+           console.log(speechOutput);
+           return {
                 card: card,
                 outputSpeech: speechOutput + repromptText
-            });
-
-        });
-
-        defer.resolve(userid);
+            };
+	});
 
     }
-    */
 
 
 
