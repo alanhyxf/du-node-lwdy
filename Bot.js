@@ -33,56 +33,59 @@ class InquiryBot extends Bot {
     }
 
 
-    functin StartGame(){
-        return defer.promise;
-    }
 
-
-    function getQuestionsList(){
-        var questionsList=[];
-//从数据库里面获得题库
-        let query_str ="SELECT id,content FROM lwdy WHERE "+
-            "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
-        let query_var=GAME_LENGTH;
-        let mysql_conn = ConnUtils.get_mysql_client();
-        mysql_conn.query(query_str,query_var,function (error, results, fields) {
-            if(error){
-                throw error;
-            }
-            for(var i = 0; i < results.length; i++)
-            {
-                console.log("%d\t%s\t%s", results[i].id, results[i].content);
-                var key=results[i].content;
-                var obj={};
-                obj[key]=['a','b','c'];
-                questionsList.push(obj);
-    
-            }
-        });
-        return questionsList;
-
-    }
-
-
-    function getUser(userid){
-        let query_str ="SELECT username " +
-                    "FROM hy_users " +
-                    "WHERE (userid = ?) " +
-                    "LIMIT 1 ";
-        let query_var=userid;
-        let mysql_conn = ConnUtils.get_mysql_client();
-        mysql_conn.query(query_str,query_var,function (error, results, fields) {
-            if(!error){
-                return results[0].username;
-            }
-        });
-    }
 
 
     launch() {
         this.waitAnswer();
         let self=this;
         let userid=this.request.getUserId();
+
+
+        function StartGame(){
+            return defer.promise;
+        }
+
+
+        function getQuestionsList(){
+            var questionsList=[];
+    //从数据库里面获得题库
+            let query_str ="SELECT id,content FROM lwdy WHERE "+
+                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
+            let query_var=GAME_LENGTH;
+            let mysql_conn = ConnUtils.get_mysql_client();
+            mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                if(error){
+                    throw error;
+                }
+                for(var i = 0; i < results.length; i++)
+                {
+                    console.log("%d\t%s\t%s", results[i].id, results[i].content);
+                    var key=results[i].content;
+                    var obj={};
+                    obj[key]=['a','b','c'];
+                    questionsList.push(obj);
+        
+                }
+            });
+            return questionsList;
+
+        }
+
+
+        function getUser(userid){
+            let query_str ="SELECT username " +
+                        "FROM hy_users " +
+                        "WHERE (userid = ?) " +
+                        "LIMIT 1 ";
+            let query_var=userid;
+            let mysql_conn = ConnUtils.get_mysql_client();
+            mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                if(!error){
+                    return results[0].username;
+                }
+            });
+        }
 
         StartGame().then(function(userid){
             return getUser(userid);
@@ -108,7 +111,7 @@ class InquiryBot extends Bot {
             this.setSessionAttribute('score',0);
             this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
             console.log(questionsList);
-        }.then(function()
+        }).then(function()
         {
             let card = new Bot.Card.TextCard(repromptText);
             let speechOutput = '欢迎你' + results[0].username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
