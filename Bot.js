@@ -131,14 +131,20 @@ class InquiryBot extends Bot {
         getUser(userid)
            .then(function(value){
                console.log('repromptText',repromptText);
-    	       let card=new Bot.Card.TextCard(repromptText);
+    	       
                let speechOutput = '欢迎你' + value + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-               console.log(speechOutput);
+               
                return {
                     card: card,
                     outputSpeech: speechOutput + repromptText
                 };
     	   });
+        let card=new Bot.Card.TextCard(repromptText);
+        console.log(speechOutput);
+        return {
+                    card: card,
+                    outputSpeech: speechOutput + repromptText
+        };   
     }
 
 
