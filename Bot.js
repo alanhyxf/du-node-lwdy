@@ -75,25 +75,6 @@ class InquiryBot extends Bot {
         }
 
 
-        function getUser(userid){
-            console.log('getuser');
-            let query_str ="SELECT username " +
-                        "FROM hy_users " +
-                        "WHERE (userid = ?) " +
-                        "LIMIT 1 ";
-            let query_var=userid;
-            
-            return new Promise(function(resolve,reject){
-                let mysql_conn = ConnUtils.get_mysql_client();
-                mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                    if(!error){
-                        resolve(results[0].username);
-                    }else{
-                        reject(error)
-                    }
-                });
-            });
-        }
 
 
         function setQuestionsList(questions)
@@ -129,17 +110,30 @@ class InquiryBot extends Bot {
     	        repromptText=setQuestionsList(results);	
     	      //  console.log(repromptText);
             });
-        getUser(userid)
-           .then(function(value){
-               username=value;               
-    	   });
-       let card=new Bot.Card.TextCard(repromptText);
-       let speechOutput = '欢迎你,' + username + '我们将从笠翁对韵中随机抽取十句，要求你根据上句选择下句。';
-       console.log(speechOutput);
-       return {
-                card: card,
-                outputSpeech: speechOutput + repromptText
-       };   
+
+
+        return new Promise(function (resolve, reject) {
+            let query_str ="SELECT username " +
+                        "FROM hy_users " +
+                        "WHERE (userid = ?) " +
+                        "LIMIT 1 ";
+            let query_var=userid;
+            let mysql_conn = ConnUtils.get_mysql_client();
+            mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                if (typeof(results) != "undefined" && results.length > 0){
+                    username=results[0].name;
+                    resolve({
+                        directives: [self.getTemplate1(results[0].name)],
+                        outputSpeech: '欢迎你' + username +  repromptText
+                    });
+                }else{
+                    resolve({
+                        directives: [self.getTemplate1(results[0].name)],
+                        outputSpeech: '你好，你叫什么名字？'
+                    });
+                }
+            });
+        });
 
     }
 
