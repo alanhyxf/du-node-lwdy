@@ -37,7 +37,12 @@ class InquiryBot extends Bot {
     }
 
 
+    function startNewGamePromise(promiseUser,promiseQuestion){
+        return Promise.all([promiseUser,promiseQuestion])
+        .then(values=>{
 
+        })
+    }
 
     launch() {
         this.waitAnswer();
@@ -45,11 +50,24 @@ class InquiryBot extends Bot {
         let userid=this.request.getUserId();
         var repromptText='';
 
+        startNewGamePromise(getUser(),getQuestion()).
+        then(
+            data=>{
+                console.log(data);
+            }
+            )
+
         this.startNewGame().then((value)=>
         {      console.log(value);
                   repromptText=value;}
 	);
 
+
+        
+
+    }
+
+    getUser(){
         return new Promise(function (resolve, reject) {
             let query_str ="SELECT username " +
                         "FROM hy_users " +
@@ -76,10 +94,9 @@ class InquiryBot extends Bot {
                 }
             });
         });
-
     }
-
-    startNewGame() {
+    
+    getQuestion() {
         let self=this;
         return new Promise(function (resolve, reject) {
             var questions=[]; 
