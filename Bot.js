@@ -83,8 +83,8 @@ class InquiryBot extends Bot {
         let self=this;
         return new Promise(function (resolve, reject) {
             var questions=[]; 
-            let query_str ="SELECT id,content FROM lwdy WHERE "+
-                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy))) ORDER BY id LIMIT 0,?";
+            let query_str ="SELECT id,ll,lr,lr1,lr2,lr3 FROM lwdy_sel  WHERE "+
+                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy_sel))) ORDER BY id LIMIT 0,?";
             let query_var=GAME_LENGTH;
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
@@ -92,15 +92,10 @@ class InquiryBot extends Bot {
 
                     for(var i = 0; i < results.length; i++)
                     {
-                        var str = results[i].content;
-             
-                        var keys = str.split(/[;对 ；]/);
-                        for (var j = 0; j< keys.length; j++) {
-                            console.log(j,keys.length,keys[j]);
-                        }
-                        var key=keys[0];
+
+                        var key=results[i].ll;
                         var obj={};
-                        obj[key]=[keys[1],keys[1],keys[1]];
+                        obj[key]=[results[i].lr,results[i].lr1,results[i].lr2,results[i].lr3];
                         //obj[key]=keys[1];
                         questions.push(obj);
                     }
