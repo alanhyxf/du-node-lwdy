@@ -54,12 +54,14 @@ class InquiryBot extends Bot {
         return this.startNewGamePromise(this.getUser(userid),this.getQuestion()).
         then(
             data=>{
+		   console.log('data[0]',data[0]);
                    if (data[0] == "" || data[0] == undefined || data[0] == null){
 			let speechOutput = '请报你的用户名'
-		        return({
-			directives: [this.getTemplate1(titleStr,'请先注册用户',defaultBkg)],
-                        outputSpeech: speechOutput +  repromptText
-			}) 
+		   	this.nlu.ask('username');
+		        return Promise.resolve({
+				directives: [this.getTemplate1(titleStr,'请先注册用户',defaultBkg)],
+                        	outputSpeech: speechOutput
+			}) ;
 			} 
                    let speechOutput = '欢迎来到笠翁对韵。'+data[0]+'我将念上句，请你按照选项回答下句。';
 		   let repromptText = data[1];
@@ -84,7 +86,7 @@ class InquiryBot extends Bot {
             let query_var=userid;
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if (!error){
+                if (!error && typeof(results) != "undefined" && results.length > 0){
                     let username=results[0].username;
                     resolve(username);
                 }else{
