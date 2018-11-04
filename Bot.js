@@ -3,23 +3,24 @@
   * @author yelvye@baidu.com
   */
  
-const defaultBkg = 'http://dbp-resource.gz.bcebos.com/92bb7de1-5d92-dab4-9c39-84c1998470a3/default.jpg?authorization=bce-auth-v1%2Fa4d81bbd930c41e6857b989362415714%2F2018-10-17T14%3A47%3A46Z%2F-1%2F%2Fcf2a0f8ff98250a2a00e592bb42b5f1d2d001e6ff96e24320548e5932615d0b0';
+const defaultBkg = 'https://tac-hyreading-st-1256361653.cos.ap-shanghai.myqcloud.com/timg.jpg';
 const titleStr = '笠翁对韵';
 
 const Bot = require('bot-sdk');
 let ConnUtils = require('./tools/ConnUtils');
 const privateKey = require("./rsaKeys.js").privateKey;
-//const questions = require('./questions');
 var Q=require('q');
 var defer=Q.defer();
 
 //定义一轮问答中的问题数量
 const GAME_LENGTH = 10;
 //定义每个问题的答案数量
-const ANSWER_COUNT = 3;
+const ANSWER_COUNT = 4;
 
 
 class InquiryBot extends Bot {
+
+
     genToken(token) {
         let buffer = new Buffer(token.toString());
         return buffer.toString('base64');
@@ -37,10 +38,10 @@ class InquiryBot extends Bot {
     }
 
 
-    function startNewGamePromise(promiseUser,promiseQuestion){
+    startNewGamePromise(promiseUser,promiseQuestion){
         return Promise.all([promiseUser,promiseQuestion])
         .then(values=>{
-
+             return values;
         })
     }
 
@@ -49,25 +50,32 @@ class InquiryBot extends Bot {
         let self=this;
         let userid=this.request.getUserId();
         var repromptText='';
-
-        startNewGamePromise(getUser(),getQuestion()).
+        console.log('userid=',userid);
+        return this.startNewGamePromise(this.getUser(userid),this.getQuestion()).
         then(
             data=>{
-                console.log(data);
-            }
-            )
+                   if (data[0] == "" || data[0] == undefined || data[0] == null){
+			let speechOutput = '请报你的用户名'
+		        return({
+			directives: [this.getTemplate1(titleStr,'请先注册用户',defaultBkg)],
+                        outputSpeech: speechOutput +  repromptText
+			}) 
+			} 
+                   let speechOutput = '欢迎来到笠翁对韵。'+data[0]+'我将念上句，请你按照选项回答下句。';
+		   let repromptText = data[1];
+                   console.log('username,repromptText',data[0],data[1]);
+                   //let card = new Bot.Card.TextCard(repromptText);
+                   return Promise.resolve({
+			directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],                    
+			outputSpeech: speechOutput +  repromptText
+                   });
+		}
+            ).catch(data=>{return {directives:[this.getTemplate1('Error','系统错误:1000',defautlBkg)]}});
 
-        this.startNewGame().then((value)=>
-        {      console.log(value);
-                  repromptText=value;}
-	);
-
-
-        
 
     }
 
-    getUser(){
+    getUser(userid){
         return new Promise(function (resolve, reject) {
             let query_str ="SELECT username " +
                         "FROM hy_users " +
@@ -78,19 +86,9 @@ class InquiryBot extends Bot {
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
                 if (!error){
                     let username=results[0].username;
-                    let speechOutput = '欢迎来到笠翁对韵。我将念上句，请你回答下句。';
-                     console.log('username,repromptText',username,repromptText);
-                    //let card = new Bot.Card.TextCard(repromptText);
-                    resolve({
-                        directives: [self.getTemplate1(titleStr,speechOutput,defaultBkg)],
-                        //card:card,
-                        outputSpeech: speechOutput +  repromptText
-                    });
+                    resolve(username);
                 }else{
-                    resolve({
-                        //directives: [self.getTemplate1(username)],
-                        outputSpeech: '你好，你叫什么名字？'
-                    });
+                    resolve('');
                 }
             });
         });
@@ -100,13 +98,13 @@ class InquiryBot extends Bot {
         let self=this;
         return new Promise(function (resolve, reject) {
             var questions=[]; 
-            let query_str ="SELECT id,ll,lr,lr1,lr2,lr3 FROM lwdy_sel  WHERE "+
-                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM lwdy_sel))) ORDER BY id LIMIT 0,?";
+            let query_str ="SELECT id,ll,lr,lr1,lr2,lr3,chapter  FROM book_lwdy_sel  WHERE "+
+                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM book_lwdy_sel))) ORDER BY id LIMIT 0,?";
             let query_var=GAME_LENGTH;
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
                 if (!error){
-
+                    console.log('begin query question');
                     for(var i = 0; i < results.length; i++)
                     {
 
@@ -115,6 +113,7 @@ class InquiryBot extends Bot {
                         obj[key]=[results[i].lr,results[i].lr1,results[i].lr2,results[i].lr3];
                         //obj[key]=keys[1];
                         questions.push(obj);
+
                     }
 
                     
@@ -125,9 +124,9 @@ class InquiryBot extends Bot {
                     let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
                     let currentQuestionIndex = 0;
                     let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-                    let repromptText = '第1题：\n' + spokenQuestion + '\n';
+                    let repromptText = '第1题 ' + spokenQuestion + '\n';
                     for (let i = 0; i < ANSWER_COUNT; i += 1) {
-                        repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+                        repromptText += ` ${i + 1}.  ${roundAnswers[i]} `;
                     }
                 
                     let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
@@ -216,10 +215,14 @@ class InquiryBot extends Bot {
         return answers;
     }
 
-    getTemplate1(text) {
+    getTemplate1(title,text,bkg) {
     	console.log(text);
         let bodyTemplate = new Bot.Directive.Display.Template.BodyTemplate1();
-        bodyTemplate.setPlainTextContent(text);
+        bodyTemplate.setPlainTextContent(text,-1);
+	bodyTemplate.setToken('token');
+	bodyTemplate.setBackGroundImage(bkg);
+	bodyTemplate.setTitle(title);
+	
         let renderTemplate = new Bot.Directive.Display.RenderTemplate(bodyTemplate);
         return renderTemplate;
     }
@@ -329,9 +332,9 @@ class InquiryBot extends Bot {
         let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
         let roundAnswers = this.populateRoundAnswers(gameQuestions, currentQuestionIndex,correctAnswerIndex,questionsList);
         let questionIndexForSpeech = currentQuestionIndex + 1;
-        let repromptText = '第' + questionIndexForSpeech + '题：\n' + spokenQuestion + '\n';
+        let repromptText = '第' + questionIndexForSpeech + '题 ' + spokenQuestion + '\n';
         for (let i = 0; i < ANSWER_COUNT; i += 1) {
-            repromptText += `${i + 1}. ${roundAnswers[i]}. `;
+            repromptText += `${i + 1}.  ${roundAnswers[i]} `;
         }
         speechOutput += repromptText;
         let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
