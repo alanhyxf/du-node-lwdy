@@ -47,8 +47,8 @@ class InquiryBot extends Bot {
 
     launch() {
         this.waitAnswer();
-        let card = new Bot.Card.TextCard('欢迎来到恒雅国学启蒙。您可以有 \n 1. 学习模式 \n 2. 跟读模式 \n 3. 测试模式 \n 4.闯关模式 ');
-        let speechOut= '请您先选书后，选择模式。';
+        let card = new Bot.Card.TextCard('欢迎来到恒雅国学启蒙。 \n 1. 学习模式 \n 2. 跟读模式 \n 3. 测试模式 \n 4.闯关模式 ');
+        let speechOutput= '请您先选书后，选择模式。';
         return ({
             card: card,
             outputSpeech: speechOutput
@@ -281,20 +281,10 @@ class InquiryBot extends Bot {
 
         let self=this;
         let userid=this.request.getUserId();
-        var repromptText='';
         console.log('userid=',userid);
         return this.startNewGamePromise(this.getUser(userid),this.getQuestion()).
         then(
             data=>{
-           console.log('data[0]',data[0]);
-                   if (data[0] == "" || data[0] == undefined || data[0] == null){
-            let speechOutput = '请报你的用户名'
-            this.nlu.ask('username');
-                return Promise.resolve({
-                directives: [this.getTemplate1(titleStr,'请先注册用户',defaultBkg)],
-                            outputSpeech: speechOutput
-            }) ;
-            } 
                    let speechOutput = '欢迎来到笠翁对韵。'+data[0]+'我将念上句，请你按照选项回答下句。';
            let repromptText = data[1];
                    console.log('username,repromptText',data[0],data[1]);
