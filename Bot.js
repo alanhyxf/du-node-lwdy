@@ -47,39 +47,19 @@ class InquiryBot extends Bot {
 
     launch() {
         this.waitAnswer();
-        let self=this;
-        let userid=this.request.getUserId();
-        var repromptText='';
-        console.log('userid=',userid);
-        return this.startNewGamePromise(this.getUser(userid),this.getQuestion()).
-        then(
-            data=>{
-		   console.log('data[0]',data[0]);
-                   if (data[0] == "" || data[0] == undefined || data[0] == null){
-			let speechOutput = '请报你的用户名'
-		   	this.nlu.ask('username');
-		        return Promise.resolve({
-				directives: [this.getTemplate1(titleStr,'请先注册用户',defaultBkg)],
-                        	outputSpeech: speechOutput
-			}) ;
-			} 
-                   let speechOutput = '欢迎来到笠翁对韵。'+data[0]+'我将念上句，请你按照选项回答下句。';
-		   let repromptText = data[1];
-                   console.log('username,repromptText',data[0],data[1]);
-                   //let card = new Bot.Card.TextCard(repromptText);
-                   return Promise.resolve({
-			directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],                    
-			outputSpeech: speechOutput +  repromptText
-                   });
-		}
-            ).catch(data=>{return {directives:[this.getTemplate1('Error','系统错误:1000',defautlBkg)]}});
-
-
+        let card = new Bot.Card.TextCard('欢迎来到恒雅国学启蒙。您可以有 \n 1. 学习模式 \n 2. 跟读模式 \n 3. 测试模式 \n 4.闯关模式 ');
+        let speechOut= '请您先选书后，选择模式。';
+        return ({
+            card: card,
+            outputSpeech: speechOutput
+            }) ;
     }
 
     getUser(userid){
+        //先提前判断该用户是否登录过，如没有，增加登录记录。 如有，存取历史记录。
+        //
         return new Promise(function (resolve, reject) {
-            let query_str ="SELECT username " +
+            let query_str ="SELECT score " +
                         "FROM hy_users " +
                         "WHERE (userid = ?) " +
                         "LIMIT 1 ";
@@ -87,10 +67,26 @@ class InquiryBot extends Bot {
             let mysql_conn = ConnUtils.get_mysql_client();
             mysql_conn.query(query_str,query_var,function (error, results, fields) {
                 if (!error && typeof(results) != "undefined" && results.length > 0){
-                    let username=results[0].username;
-                    resolve(username);
+
+                    //如有存取记录，获取属性。
+                    let gamescore=results[0].score;
+                    self.setSessionAttribute('GameScore',gamescore);
+                    resolve('OK1');
                 }else{
-                    resolve('');
+                    //增加用户账号
+                    var addSql = 'INSERT INTO hy_user (userid) VALUES(?)';
+                    var addSqlParams = userid;
+
+                    connection.query(addSql,addSqlParams, function(err, results, fields) {
+                                 if (err) {
+                                          console.log(err);
+
+                                  }else{
+                                          console.log(results);
+                                          resolve('OK2');
+                                   }
+                    })
+                    resolve('OK3');
                 }
             });
         });
@@ -217,6 +213,8 @@ class InquiryBot extends Bot {
         return answers;
     }
 
+
+
     getTemplate1(title,text,bkg) {
     	console.log(text);
         let bodyTemplate = new Bot.Directive.Display.Template.BodyTemplate1();
@@ -271,13 +269,44 @@ class InquiryBot extends Bot {
 
 
    /**
-     * 悯农
+     * 
      *
      * @return {Object}
      */
     AnswerIntent() {
         this.waitAnswer();
         let theAnswer = this.getSlot('theAnswer');
+
+        
+
+        let self=this;
+        let userid=this.request.getUserId();
+        var repromptText='';
+        console.log('userid=',userid);
+        return this.startNewGamePromise(this.getUser(userid),this.getQuestion()).
+        then(
+            data=>{
+           console.log('data[0]',data[0]);
+                   if (data[0] == "" || data[0] == undefined || data[0] == null){
+            let speechOutput = '请报你的用户名'
+            this.nlu.ask('username');
+                return Promise.resolve({
+                directives: [this.getTemplate1(titleStr,'请先注册用户',defaultBkg)],
+                            outputSpeech: speechOutput
+            }) ;
+            } 
+                   let speechOutput = '欢迎来到笠翁对韵。'+data[0]+'我将念上句，请你按照选项回答下句。';
+           let repromptText = data[1];
+                   console.log('username,repromptText',data[0],data[1]);
+                   //let card = new Bot.Card.TextCard(repromptText);
+                   return Promise.resolve({
+            directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],                    
+            outputSpeech: speechOutput +  repromptText
+                   });
+        }
+            ).catch(data=>{return {directives:[this.getTemplate1('Error','系统错误:1000',defautlBkg)]}});
+
+
         if (!theAnswer) {
             this.nlu.ask('theAnswer');
             return {
