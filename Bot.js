@@ -30,13 +30,34 @@ class InquiryBot extends Bot {
         super(postData);
         this.addLaunchHandler(this.launch);
         this.addSessionEndedHandler(this.sessionEndedRequest);
-        this.addIntentHandler('Regis', this.register);
+        
+        //学习模式
+        this.addIntentHandler('learn_intent', this.learnIntent);
+        //跟读模式
+        this.addIntentHandler('follow_intent', this.followIntent);
+        //测试模式
         this.addIntentHandler('answer_intent', this.AnswerIntent);
+        
+        //重新开始
         this.addIntentHandler('newGame_intent', this.newGame);
+        //默认意图
         this.addIntentHandler('ai.dueros.common.default_intent', this.CommonIntent);
+        
         this.addDefaultEventListener(this.defaultEvent);
     }
 
+
+
+
+    launch() {
+        this.waitAnswer();
+        let card = new Bot.Card.TextCard('欢迎来到恒雅国学启蒙。 \n 1.学习模式 \n 2.跟读模式 \n 3.测试模式 \n 4.闯关模式 ');
+        let speechOutput= '请您先选书后，选择模式。';
+        return ({
+            card: card,
+            outputSpeech: speechOutput
+            }) ;
+    }
 
     startNewGamePromise(promiseUser,promiseQuestion){
         return Promise.all([promiseUser,promiseQuestion])
@@ -45,15 +66,6 @@ class InquiryBot extends Bot {
         })
     }
 
-    launch() {
-        this.waitAnswer();
-        let card = new Bot.Card.TextCard('欢迎来到恒雅国学启蒙。 \n 1. 学习模式 \n 2. 跟读模式 \n 3. 测试模式 \n 4.闯关模式 ');
-        let speechOutput= '请您先选书后，选择模式。';
-        return ({
-            card: card,
-            outputSpeech: speechOutput
-            }) ;
-    }
 
     getUser(userid){
         //先提前判断该用户是否登录过，如没有，增加登录记录。 如有，存取历史记录。
@@ -386,6 +398,77 @@ class InquiryBot extends Bot {
             outputSpeech: '好的，重新开始。' + repromptText
         };
     }
+
+
+
+   /**
+     * 学习模式
+     *
+     * @return {Object}
+     */
+    learnIntent() {
+        this.waitAnswer();
+        let theAnswer = this.getSlot('chapter');
+
+
+        if (!chapter) {
+            this.nlu.ask('chapter');
+            //  如果有异步操作，可以返回一个promise
+            return new Promise(function (resolve, reject) {
+                resolve({
+                    directives: [this.getTemplate1(titleStr,'请选择章节',defaultBkg)],
+                    outputSpeech: '请选择章节，比如上卷第一章'
+                });
+            });
+        }
+        if(!contentList){}
+            contentList= new Promise(function (resolve, reject) {
+            var questions=[]; 
+            let query_str ="SELECT content  FROM book_lwdy_sel  WHERE "+
+                "locate(?,chapter)>0";
+            let query_var=GAME_LENGTH;
+            let mysql_conn = ConnUtils.get_mysql_client();
+            mysql_conn.query(query_str,query_var,function (error, results, fields) {
+                if (!error){
+                    console.log('begin query chapter');
+                    for(var i = 0; i < results.length; i++)
+                    {
+                        var key=results[i].content;
+                        contentList.push(key);
+                    }
+                    this.SetSessionAttribute('contentList',contentList);
+                    this.SetSessionAttribute('contentListSeq',0);
+                    resolve(contentList);
+                }else{
+                    reject(error);
+                }
+            });
+            });   
+        }
+        let contentList= this.getSessionAttribute('contentList');
+        let contentListSeq= this.getSessionAttribute('contentListSeq');
+        console.log(contentList[contentListSeq]);
+        if (contentListSeq==contentList.length){
+            this.SetSessionAttribute('contentListSeq',contentList.length);
+        }
+
+        return ({
+            directives: [this.getTemplate1(titleStr,contentList[contentListSeq],defaultBkg)],
+            outputSpeech: '请contentList[contentListSeq]
+        })
+
+
+
+
+
+
+
+    }
+
+
+        
+
+
 
     CommonIntent() {
         this.waitAnswer();  
