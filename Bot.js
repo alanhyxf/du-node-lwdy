@@ -57,7 +57,7 @@ class InquiryBot extends Bot {
 
     getUser(userid){
         //先提前判断该用户是否登录过，如没有，增加登录记录。 如有，存取历史记录。
-        //
+        let self=this;
         return new Promise(function (resolve, reject) {
             let query_str ="SELECT score " +
                         "FROM hy_users " +
@@ -74,10 +74,10 @@ class InquiryBot extends Bot {
                     resolve('OK1');
                 }else{
                     //增加用户账号
-                    var addSql = 'INSERT INTO hy_user (userid) VALUES(?)';
+                    var addSql = 'INSERT INTO hy_users (userid) VALUES(?)';
                     var addSqlParams = userid;
 
-                    connection.query(addSql,addSqlParams, function(err, results, fields) {
+                    mysql_conn.query(addSql,addSqlParams, function(err, results, fields) {
                                  if (err) {
                                           console.log(err);
 
@@ -281,12 +281,12 @@ class InquiryBot extends Bot {
 
         let self=this;
         let userid=this.request.getUserId();
-        console.log('userid=',userid);
+        if (!theAnswer) {	
         return this.startNewGamePromise(this.getUser(userid),this.getQuestion()).
         then(
             data=>{
-                   let speechOutput = '欢迎来到笠翁对韵。'+data[0]+'我将念上句，请你按照选项回答下句。';
-           let repromptText = data[1];
+                   let speechOutput = '我将念上句，请你按照选项回答下句。';
+           	   let repromptText = data[1];
                    console.log('username,repromptText',data[0],data[1]);
                    //let card = new Bot.Card.TextCard(repromptText);
                    return Promise.resolve({
@@ -295,14 +295,8 @@ class InquiryBot extends Bot {
                    });
         }
             ).catch(data=>{return {directives:[this.getTemplate1('Error','系统错误:1000',defautlBkg)]}});
+         }
 
-
-        if (!theAnswer) {
-            this.nlu.ask('theAnswer');
-            return {
-                outputSpeech: '您的答案是哪个？'
-            };
-        }
 
         //获取session中相关信息
         let questionsList = this.getSessionAttribute('questionsList');
