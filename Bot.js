@@ -408,11 +408,12 @@ class InquiryBot extends Bot {
      */
     learnIntent() {
         this.waitAnswer();
-        let theAnswer = this.getSlot('chapter');
+        let chapter = this.getSlot('chapter');
+	console.log('chapter',chapter)
 
-
-        if (!chapter) {
-            this.nlu.ask('chapter');
+        if (typeof(chapter)==undefined) {
+            console.log('ask chapter'); 
+	    //this.nlu.ask('chapter');
             //  如果有异步操作，可以返回一个promise
             return new Promise(function (resolve, reject) {
                 resolve({
@@ -421,8 +422,8 @@ class InquiryBot extends Bot {
                 });
             });
         }
-        if(!contentList){}
-            contentList= new Promise(function (resolve, reject) {
+        if(typeof(contentList)==undefined){
+            return new Promise(function (resolve, reject) {
             var questions=[]; 
             let query_str ="SELECT content  FROM book_lwdy_sel  WHERE "+
                 "locate(?,chapter)>0";
@@ -454,7 +455,7 @@ class InquiryBot extends Bot {
 
         return ({
             directives: [this.getTemplate1(titleStr,contentList[contentListSeq],defaultBkg)],
-            outputSpeech: '请contentList[contentListSeq]
+            outputSpeech: contentList[contentListSeq]
         })
 
 
