@@ -34,6 +34,46 @@ class InquiryBot extends Bot {
         super(postData);
         this.addLaunchHandler(this.launch);
         this.addSessionEndedHandler(this.sessionEndedRequest);
+
+        this.addEventListener('Display.ElementSelected', function(event) {
+            let token = event.token;
+            console.log('console log token',token)
+            let listTemplate = new ListTemplate1();
+            //设置模板token
+            listTemplate.setToken('token');
+            //设置模板背景图
+            listTemplate.setBackGroundImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+            //设置模版标题
+            listTemplate.setTitle('笠翁对韵');
+
+            //设置模版列表数组listItems其中一项，即列表的一个元素
+            let Item1 = new ListTemplateItem();
+            Item1.setToken('token');
+            Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+            //or 图片设置宽和高
+            Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
+            Item1.setPlainPrimaryText('东一');
+            Item1.setPlainSecondaryText('东一');
+
+            let Item2 = new ListTemplateItem();
+            Item2.setToken('token');
+            Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+            //or 图片设置宽和高
+            Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
+            Item2.setPlainPrimaryText('夏二');
+            Item2.setPlainSecondaryText('夏二');
+
+
+            //把listTemplateItem添加到模版listItems
+            listTemplate.addItem(Item1);
+            listTemplate.addItem(Item2);
+            //定义RenderTemplate指令
+            let directive = new RenderTemplate(listTemplate);
+            return {
+                directives: [directive],
+                outputSpeech: '请您选择章节'
+            };
+        });
         
 
         //学习模式
@@ -72,8 +112,19 @@ class InquiryBot extends Bot {
         Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
         Item1.setPlainPrimaryText('笠翁对韵');
         Item1.setPlainSecondaryText('国学经典启蒙');
+
+        let Item2 = new ListTemplateItem();
+        Item2.setToken('token');
+        Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+        //or 图片设置宽和高
+        Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
+        Item2.setPlainPrimaryText('论语');
+        Item2.setPlainSecondaryText('儒家启蒙');
+
+
         //把listTemplateItem添加到模版listItems
         listTemplate.addItem(Item1);
+        listTemplate.addItem(Item2);
         //定义RenderTemplate指令
         let directive = new RenderTemplate(listTemplate);
         return {
@@ -306,6 +357,7 @@ class InquiryBot extends Bot {
             outputSpeech: '多谢使用!'
         };
     }
+
 
 
    /**
