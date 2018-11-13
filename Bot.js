@@ -4,13 +4,17 @@
   */
  
 const defaultBkg = 'https://tac-hyreading-st-1256361653.cos.ap-shanghai.myqcloud.com/timg.jpg';
-const titleStr = '笠翁对韵';
+const titleStr = '国学闯关';
 
 const Bot = require('bot-sdk');
 let ConnUtils = require('./tools/ConnUtils');
 const privateKey = require("./rsaKeys.js").privateKey;
-var Q=require('q');
-var defer=Q.defer();
+
+
+
+const RenderTemplate = BaseBot.Directive.Display.RenderTemplate;
+const ListTemplate2 =BaseBot.Directive.Display.Template.ListTemplate2;
+const ListTemplateItem = BaseBot.Directive.Display.Template.ListTemplateItem;
 
 //定义一轮问答中的问题数量
 const GAME_LENGTH = 10;
@@ -31,13 +35,13 @@ class InquiryBot extends Bot {
         this.addLaunchHandler(this.launch);
         this.addSessionEndedHandler(this.sessionEndedRequest);
         
+
         //学习模式
         this.addIntentHandler('learn_intent', this.learnIntent);
         //跟读模式
         this.addIntentHandler('follow_intent', this.followIntent);
         //测试模式
         this.addIntentHandler('answer_intent', this.AnswerIntent);
-        
         //重新开始
         this.addIntentHandler('newGame_intent', this.newGame);
         //默认意图
@@ -51,13 +55,37 @@ class InquiryBot extends Bot {
 
     launch() {
         this.waitAnswer();
-        let card = new Bot.Card.TextCard('欢迎来到恒雅国学启蒙。 \n 1.学习模式 \n 2.跟读模式 \n 3.测试模式 \n 4.闯关模式 ');
-        let speechOutput= '请您先选书后，选择模式。';
-        return ({
-            card: card,
-            outputSpeech: speechOutput
-            }) ;
+
+        let listTemplate = new ListTemplate2();
+        //设置模板token
+        listTemplate.setToken('token');
+        //设置模板背景图
+        listTemplate.setBackGroundImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+        //设置模版标题
+        listTemplate.setTitle('国学经典');
+
+        //设置模版列表数组listItems其中一项，即列表的一个元素
+        listTemplateItem = new ListTemplateItem();
+        listTemplateItem.setToken('token');
+        listTemplateItem.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+        //or 图片设置宽和高
+        listTemplateItem.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
+        listTemplateItem.setPlainPrimaryText('笠翁对韵');
+        listTemplateItem.setPlainSecondaryText('国学经典启蒙');
+        //把listTemplateItem添加到模版listItems
+        listTemplate.addItem(listTemplateItem);
+        //定义RenderTemplate指令
+        let directive = new RenderTemplate(listTemplate);
+        return {
+            directives: [directive],
+            outputSpeech: '请您先选择书籍'
+        };
+
+
     }
+
+
+
 
     startNewGamePromise(promiseUser,promiseQuestion){
         return Promise.all([promiseUser,promiseQuestion])
