@@ -38,41 +38,55 @@ class InquiryBot extends Bot {
         this.addEventListener('Display.ElementSelected', function(event) {
             let token = event.token;
             console.log('console log token',token)
-            let listTemplate = new ListTemplate1();
-            //设置模板token
-            listTemplate.setToken('token');
-            //设置模板背景图
-            listTemplate.setBackGroundImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
-            //设置模版标题
-            listTemplate.setTitle('笠翁对韵');
 
-            //设置模版列表数组listItems其中一项，即列表的一个元素
-            let Item1 = new ListTemplateItem();
-            Item1.setToken('token');
-            Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
-            //or 图片设置宽和高
-            Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
-            Item1.setPlainPrimaryText('东一');
-            Item1.setPlainSecondaryText('东一');
+            if （token=='token01'）{
+                let listTemplate = new ListTemplate1();
+                //设置模板token
+                listTemplate.setToken('token');
+                //设置模板背景图
+                listTemplate.setBackGroundImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+                //设置模版标题
+                listTemplate.setTitle('笠翁对韵');
 
-            let Item2 = new ListTemplateItem();
-            Item2.setToken('token');
-            Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
-            //or 图片设置宽和高
-            Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
-            Item2.setPlainPrimaryText('夏二');
-            Item2.setPlainSecondaryText('夏二');
+                //设置模版列表数组listItems其中一项，即列表的一个元素
+                let Item1 = new ListTemplateItem();
+                Item1.setToken('token0101');
+                Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+                //or 图片设置宽和高
+                Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
+                Item1.setPlainPrimaryText('东一');
+                Item1.setPlainSecondaryText('东一');
+
+                let Item2 = new ListTemplateItem();
+                Item2.setToken('token0102');
+                Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+                //or 图片设置宽和高
+                Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
+                Item2.setPlainPrimaryText('夏二');
+                Item2.setPlainSecondaryText('夏二');
 
 
-            //把listTemplateItem添加到模版listItems
-            listTemplate.addItem(Item1);
-            listTemplate.addItem(Item2);
-            //定义RenderTemplate指令
-            let directive = new RenderTemplate(listTemplate);
-            return {
-                directives: [directive],
-                outputSpeech: '请您选择章节'
-            };
+                //把listTemplateItem添加到模版listItems
+                listTemplate.addItem(Item1);
+                listTemplate.addItem(Item2);
+                //定义RenderTemplate指令
+                let directive = new RenderTemplate(listTemplate);
+                return {
+                    directives: [directive],
+                    outputSpeech: '请您选择章节'
+                };
+            }
+
+            if （token=='token0101'）{
+                 let card = new Bot.Card.TextCard('准备好了就请说开始测试');
+                 return {
+                    card: card,
+                    outputSpeech: '准备好了就请说开始测试'
+                };
+            }
+
+            
+
         });
         
 
@@ -98,7 +112,7 @@ class InquiryBot extends Bot {
 
         let listTemplate = new ListTemplate1();
         //设置模板token
-        listTemplate.setToken('token');
+        listTemplate.setToken('token00');
         //设置模板背景图
         listTemplate.setBackGroundImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
         //设置模版标题
@@ -106,7 +120,7 @@ class InquiryBot extends Bot {
 
         //设置模版列表数组listItems其中一项，即列表的一个元素
         let Item1 = new ListTemplateItem();
-        Item1.setToken('token');
+        Item1.setToken('token01');
         Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
         //or 图片设置宽和高
         Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
@@ -114,7 +128,7 @@ class InquiryBot extends Bot {
         Item1.setPlainSecondaryText('国学经典启蒙');
 
         let Item2 = new ListTemplateItem();
-        Item2.setToken('token');
+        Item2.setToken('token02');
         Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
         //or 图片设置宽和高
         Item2.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
