@@ -25,6 +25,7 @@ app.use(session({
 
 // 探活请求
 app.head('/lwdy', (req, res) => {
+    console.log('inspect alive');
     res.sendStatus(204);
 });
 
@@ -52,6 +53,6 @@ app.post('/lwdy', (req, res) => {
             res.send(result);
         });
     });
-}).listen(8017);
+}).listen(8066);
 
-console.log('listen 8017');
+console.log('listen 8066');

@@ -12,9 +12,9 @@ const privateKey = require("./rsaKeys.js").privateKey;
 
 
 
-const RenderTemplate = BaseBot.Directive.Display.RenderTemplate;
-const ListTemplate2 =BaseBot.Directive.Display.Template.ListTemplate2;
-const ListTemplateItem = BaseBot.Directive.Display.Template.ListTemplateItem;
+const RenderTemplate = Bot.Directive.Display.RenderTemplate;
+const ListTemplate1 =Bot.Directive.Display.Template.ListTemplate1;
+const ListTemplateItem = Bot.Directive.Display.Template.ListTemplateItem;
 
 //定义一轮问答中的问题数量
 const GAME_LENGTH = 10;
@@ -56,7 +56,7 @@ class InquiryBot extends Bot {
     launch() {
         this.waitAnswer();
 
-        let listTemplate = new ListTemplate2();
+        let listTemplate = new ListTemplate1();
         //设置模板token
         listTemplate.setToken('token');
         //设置模板背景图
@@ -65,15 +65,15 @@ class InquiryBot extends Bot {
         listTemplate.setTitle('国学经典');
 
         //设置模版列表数组listItems其中一项，即列表的一个元素
-        listTemplateItem = new ListTemplateItem();
-        listTemplateItem.setToken('token');
-        listTemplateItem.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
+        let Item1 = new ListTemplateItem();
+        Item1.setToken('token');
+        Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg');
         //or 图片设置宽和高
-        listTemplateItem.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
-        listTemplateItem.setPlainPrimaryText('笠翁对韵');
-        listTemplateItem.setPlainSecondaryText('国学经典启蒙');
+        Item1.setImage('https://skillstore.cdn.bcebos.com/icon/100/c709eed1-c07a-be4a-b242-0b0d8b777041.jpg', 200, 200);
+        Item1.setPlainPrimaryText('笠翁对韵');
+        Item1.setPlainSecondaryText('国学经典启蒙');
         //把listTemplateItem添加到模版listItems
-        listTemplate.addItem(listTemplateItem);
+        listTemplate.addItem(Item1);
         //定义RenderTemplate指令
         let directive = new RenderTemplate(listTemplate);
         return {
