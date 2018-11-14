@@ -314,15 +314,12 @@ class GuoxueBot extends Bot {
                 };   
         }
 
-        if (typeof(learnmode) == undefined){
-           let mode = this.getSlot('learnmode');
-            console.log('learnmode mode1',learnmode,mode);
-             this.setSessionAttribute('learnmode',mode);
-        } else
-        {
-             let  mode=learnmode; 
-             console.log('learnmode mode2',learnmode,mode);
+        if (!learnmode){
+           let learnmode = this.getSlot('learnmode');
+            console.log('learnmode mode',learnmode);
+             this.setSessionAttribute('learnmode',learnmode);
         }
+ 
       /*  if (!mode || !learnmode){
             this.nlu.ask('learnmode'); 
             return { 
@@ -330,13 +327,14 @@ class GuoxueBot extends Bot {
             }; 
 
         }*/
-       
-
-        let CurrQuestion=Object.values(questionsList[currentQuestionIndex-1])[0][0];
-
-
+    console.log('1 2 ',typeof(currentQuestionIndex),currentQuestionIndex);
+	 var CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
+    	 if (currentQuestionIndex>0){
+         	CurrQuestion=Object.values(questionsList[currentQuestionIndex-1])[0][0];
+      	}
         let Answer = this.getSlot('theAnswer');
-        console.log(' Answer is,CurrQuestion is ,mode learnmode',Answer,CurrQuestion,mode,learnmode)
+        
+	console.log(' Answer is,CurrQuestion is ,learnmode',Answer,CurrQuestion,learnmode)
         if (Answer=='过'){
             console.log(' 过');
             currentQuestionIndex=currentQuestionIndex+1;
@@ -347,7 +345,7 @@ class GuoxueBot extends Bot {
         }
 
    //学习模式，直接朗读
-        if (mode=='learn')
+        if (learnmode=='learn')
         {
             
             currentQuestionIndex=currentQuestionIndex+1;
@@ -360,7 +358,7 @@ class GuoxueBot extends Bot {
 
         }
 
-        if ((Answer==CurrQuestion)&&(mode=='follow'))
+        if ((Answer==CurrQuestion)&&(learnmode=='follow'))
         {
 
             currentQuestionIndex=currentQuestionIndex+1;
