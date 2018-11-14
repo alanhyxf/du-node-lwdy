@@ -8,9 +8,9 @@ const bkpic = 'http://dbp-resource.gz.bcebos.com/e18a6c56-f4a0-56e9-3b3e-f2d7782
 const titleStr = '国学闯关';
 
 const book01pic='http://dbp-resource.gz.bcebos.com/e18a6c56-f4a0-56e9-3b3e-f2d778250855/book1.jpg?authorization=bce-auth-v1%2Fa4d81bbd930c41e6857b989362415714%2F2018-11-14T01%3A00%3A10Z%2F-1%2F%2F605dcdceae2b38620630b9323b80026ccf42fbd305ebdbcdc15284805bfe1200';
-const book01Str = '国学闯关';
+const book01Str = '笠翁对韵';
 const book02pic='http://dbp-resource.gz.bcebos.com/e18a6c56-f4a0-56e9-3b3e-f2d778250855/book2.jpg?authorization=bce-auth-v1%2Fa4d81bbd930c41e6857b989362415714%2F2018-11-14T01%3A00%3A10Z%2F-1%2F%2F74a35bd2f43221e5d87f8ab279b4a074e4a9744d22ae9dacf6f1744b9a61399a';
-const book01Str = '论语';
+const book02Str = '论语';
 
 const book01 = require('./book01');
 
@@ -40,7 +40,7 @@ class GuoxueBot extends Bot {
         this.addSessionEndedHandler(this.sessionEndedRequest);
 
         //选书、章节操作
-        this.addEventListener('Display.ElementSelected', this.showBook(event));
+        this.addEventListener('Display.ElementSelected', this.showBook);
 
         //学习模式
         this.addIntentHandler('learn_intent', this.learnIntent);
@@ -54,7 +54,7 @@ class GuoxueBot extends Bot {
         this.addIntentHandler('ai.dueros.common.default_intent', this.CommonIntent);
         
         this.addDefaultEventListener(this.defaultEvent);
-
+}
 
 
 
@@ -76,7 +76,7 @@ class GuoxueBot extends Bot {
 
         let Item2 = new ListTemplateItem();
         Item2.setToken('book02');
-        Item2.setImage(book01pic, 200, 200);
+        Item2.setImage(book02pic, 200, 200);
         Item2.setPlainPrimaryText('论语');
         Item2.setPlainSecondaryText('跟读0 背诵0');
 
@@ -116,10 +116,9 @@ class GuoxueBot extends Bot {
             listTemplate.addItem(Item1);
             listTemplate.addItem(Item2);
             let directive = new RenderTemplate(listTemplate);
-            let directive1 = new PushStack();
+            //let directive1 = new PushStack('PushStack');
             return {
-                directives: [directive1],
-                directives: [directive],
+                directives: ['Display.PushStack',directive],
                 outputSpeech: '请您选择章节'
             };
         }
