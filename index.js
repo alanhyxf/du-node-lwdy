@@ -7,7 +7,7 @@
  */
 
 const express = require('express');
-const InquiryBot = require('./Bot');
+const GuoxueBot = require('./guoxue');
 var querystring = require('querystring');
 let app = express();
 
@@ -43,7 +43,7 @@ app.post('/lwdy', (req, res) => {
 		//console.log('null post');
 	        return null;
 	}
-	let b = new InquiryBot(JSON.parse(req.rawBody)); 
+	let b = new GuoxueBot(JSON.parse(req.rawBody)); 
         
         // 开启签名认证
         // 本地运行可以先注释

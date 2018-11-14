@@ -45,9 +45,7 @@ class GuoxueBot extends Bot {
         //学习模式
         this.addIntentHandler('learn_intent', this.learnIntent);
         //跟读模式
-        this.addIntentHandler('follow_intent', this.followIntent);
-        //测试模式
-        this.addIntentHandler('answer_intent', this.AnswerIntent);
+      
         //重新开始
         this.addIntentHandler('newGame_intent', this.newGame);
         //默认意图
@@ -300,10 +298,23 @@ class GuoxueBot extends Bot {
      */
     learnIntent() {
         this.waitAnswer();
-       // let chapter = this.getSlot('chapter');
+        let mode = this.getSlot('mode');
 	    console.log('chapter',chapter)
 
-        if (typeof(chapter)==undefined) {
+        if (!mode){
+            this.nlu.ask('theAnswer'); 
+            return { 
+                outputSpeech: '您要选择哪个模式' 
+            }; 
+
+        }
+
+        let questionsList= this.getSessionAttribute('questionsList');
+        let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
+        console.log(questionsList[currentQuestionIndex]);
+
+        
+        if (typeof(questionsList)==undefined) {
             console.log('ask chapter'); 
 	    //this.nlu.ask('chapter');
             //  如果有异步操作，可以返回一个promise
@@ -316,9 +327,7 @@ class GuoxueBot extends Bot {
         }
 
 
-        let questionsList= this.getSessionAttribute('questionsList');
-        let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
-        console.log(questionsList[currentQuestionIndex]);
+
 
 
         return ({
