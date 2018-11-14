@@ -332,13 +332,13 @@ class GuoxueBot extends Bot {
         }*/
        
 
-        let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
+        let CurrQuestion=Object.values(questionsList[currentQuestionIndex-1])[0][0];
 
 
         let Answer = this.getSlot('theAnswer');
         console.log(' Answer is,CurrQuestion is ,mode learnmode',Answer,CurrQuestion,mode,learnmode)
         if (Answer=='过'){
-
+            console.log(' 过');
             currentQuestionIndex=currentQuestionIndex+1;
             this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
             return ({
@@ -349,8 +349,9 @@ class GuoxueBot extends Bot {
    //学习模式，直接朗读
         if (mode=='learn')
         {
-            console.log('learn mode output');
+            
             currentQuestionIndex=currentQuestionIndex+1;
+            console.log('learn mode output',currentQuestionIndex, Object.values(questionsList[currentQuestionIndex-1])[0][0]);
             this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
             return ({
                 directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
