@@ -316,12 +316,13 @@ class GuoxueBot extends Bot {
 
         if (typeof(learnmode) == undefined){
            let mode = this.getSlot('learnmode');
-           console.log('learnmode mode',learnmode,mode);
-           this.setSessionAttribute('learnmode',mode);
+            console.log('learnmode mode1',learnmode,mode);
+             this.setSessionAttribute('learnmode',mode);
         } else
-{
- let       mode=learnmode; 
-}
+        {
+             let  mode=learnmode; 
+             console.log('learnmode mode2',learnmode,mode);
+        }
       /*  if (!mode || !learnmode){
             this.nlu.ask('learnmode'); 
             return { 
