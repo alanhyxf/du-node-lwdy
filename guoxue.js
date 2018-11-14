@@ -160,10 +160,10 @@ class GuoxueBot extends Bot {
      */
     learnIntent() {
         this.waitAnswer();
-
+        let learnmode='';
         let questionsList= this.getSessionAttribute('questionsList');
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
-        let learnmode= this.getSessionAttribute('learnmode');
+        learnmode= this.getSessionAttribute('learnmode');
 
         console.log('current index ',currentQuestionIndex);
 
@@ -189,10 +189,11 @@ class GuoxueBot extends Bot {
             };   
         }
 
+        console.log('learnmode mode',learnmode);
+        
         if (!learnmode){
-           let learnmode = this.getSlot('learnmode');
-            console.log('learnmode mode',learnmode);
-             this.setSessionAttribute('learnmode',learnmode);
+            learnmode = this.getSlot('learnmode');
+            this.setSessionAttribute('learnmode',learnmode);
         }
  
 
