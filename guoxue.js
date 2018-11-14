@@ -316,11 +316,12 @@ class GuoxueBot extends Bot {
 
         if (typeof(learnmode) == undefined){
            let mode = this.getSlot('learnmode');
-           console.log('learnmode ',mode);
+           console.log('learnmode mode',learnmode,mode);
            this.setSessionAttribute('learnmode',mode);
-        }
-        mode=learnmode 
-
+        } else
+{
+ let       mode=learnmode; 
+}
       /*  if (!mode || !learnmode){
             this.nlu.ask('learnmode'); 
             return { 
@@ -334,7 +335,7 @@ class GuoxueBot extends Bot {
 
 
         let Answer = this.getSlot('theAnswer');
-        console.log(' Answer is,CurrQuestion is ,modeis',Answer,CurrQuestion,learnmode)
+        console.log(' Answer is,CurrQuestion is ,mode learnmode',Answer,CurrQuestion,mode,learnmode)
         if (Answer=='过'){
 
             currentQuestionIndex=currentQuestionIndex+1;
