@@ -117,7 +117,7 @@ class GuoxueBot extends Bot {
             let directive = new RenderTemplate(listTemplate);
             //let directive1 = new PushStack('PushStack');
             return {
-                directives: ['Display.PushStack',directive],
+                directives: [PushStack,directive],
                 outputSpeech: '请您选择章节'
             };
         }
@@ -128,8 +128,8 @@ class GuoxueBot extends Bot {
             this.setSessionAttribute('currentQuestionIndex',1); 
             this.setSessionAttribute('questionsList',questionsList); 
             this.setSessionAttribute('score',0); 
-          console.log('get list',questionsList);
-           console.log('get list ', Object.values(questionsList[0])[0][1]); 
+          //  console.log('get list',questionsList);
+          //  console.log('get list ', Object.values(questionsList[0])[0][1]); 
          //  console.log('get list index',Object.values(questionsList[])[0][1]);  
             let card = new Bot.Card.TextCard('准备好了就请说开始学习 开始跟读或者开始测试');
              return {
@@ -301,9 +301,9 @@ class GuoxueBot extends Bot {
     learnIntent() {
         this.waitAnswer();
 
-	console.log('begin to learn mode ');
-        let mode = this.getSlot('learnmode');
-	console.log('mode ',mode)
+	   console.log('begin to learn mode ');
+       let mode = this.getSlot('learnmode');
+	   console.log('mode ',mode)
 
         if (!mode){
             this.nlu.ask('learnmode'); 
@@ -312,16 +312,25 @@ class GuoxueBot extends Bot {
             }; 
 
         }
+        
+        let Answer = this.getSlot('theAnswer');
 
+        
         let questionsList= this.getSessionAttribute('questionsList');
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
         console.log(currentQuestionIndex);
 
+        let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
 
+        if (Answer==CurrQuestion)
+        {
+
+            currentQuestionIndex=currentQuestionIndex+1;
+        }
 
         return ({
-            directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex])[0][1],bkpic)],
-            outputSpeech: questionsList[currentQuestionIndex][0]
+            directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex])[0][0],bkpic)],
+            outputSpeech: '请跟读'
         })
 
     }

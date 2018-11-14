@@ -1,0 +1,7 @@
+const book01 = require('./book01');
+
+ let questionsList = book01.chapter01;
+
+ let spokenQuestion = Object.keys(questionsList[1])[0];
+
+ console.log(spokenQuestion);
