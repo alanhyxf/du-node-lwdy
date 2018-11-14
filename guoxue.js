@@ -314,9 +314,13 @@ class GuoxueBot extends Bot {
                 };   
         }
 
+        if (typeof(learnmode) == undefined){
+           let mode = this.getSlot('learnmode');
+           console.log('learnmode ',mode);
+           this.setSessionAttribute('learnmode',mode);
+        }
+        mode=learnmode 
 
-       let mode = this.getSlot('learnmode');
-	   console.log('learnmode ',mode)
       /*  if (!mode || !learnmode){
             this.nlu.ask('learnmode'); 
             return { 
@@ -324,13 +328,13 @@ class GuoxueBot extends Bot {
             }; 
 
         }*/
-        this.setSessionAttribute('learnmode',mode);
+       
 
         let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
 
 
         let Answer = this.getSlot('theAnswer');
-        console.log(' Answer is,CurrQuestion is ,modeis',Answer,CurrQuestion,mode)
+        console.log(' Answer is,CurrQuestion is ,modeis',Answer,CurrQuestion,learnmode)
         if (Answer=='过'){
 
             currentQuestionIndex=currentQuestionIndex+1;
