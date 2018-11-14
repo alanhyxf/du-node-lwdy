@@ -59,33 +59,9 @@ class GuoxueBot extends Bot {
     launch() {
         this.waitAnswer();
 
-        let listTemplate = new ListTemplate1();
-        //设置模板token
-        listTemplate.setToken('token00');
-        listTemplate.setBackGroundImage(bkpic);
-        listTemplate.setTitle(titleStr);
+        console.log('begin launch');
 
-        //设置模版列表数组listItems其中一项，即列表的一个元素
-        let Item1 = new ListTemplateItem();
-        Item1.setToken('book01');
-        Item1.setImage(book01pic, 200, 200);
-        Item1.setPlainPrimaryText(book01Str);
-        Item1.setPlainSecondaryText('跟读0 背诵0');
 
-        let Item2 = new ListTemplateItem();
-        Item2.setToken('book02');
-        Item2.setImage(book02pic, 200, 200);
-        Item2.setPlainPrimaryText('论语');
-        Item2.setPlainSecondaryText('跟读0 背诵0');
-
-        listTemplate.addItem(Item1);
-        listTemplate.addItem(Item2);
-        //定义RenderTemplate指令
-        let directive = new RenderTemplate(listTemplate);
-        return {
-            directives: [directive],
-            outputSpeech: '请您先选择书籍'
-        };
     }
 
 
@@ -301,10 +277,45 @@ class GuoxueBot extends Bot {
     learnIntent() {
         this.waitAnswer();
 
-	   console.log('begin to learn mode ');
+
+        let questionsList= this.getSessionAttribute('questionsList');
+        let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
+        let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
+        console.log(currentQuestionIndex);
+
+        if (!currentQuestionIndex){
+                let listTemplate = new ListTemplate1();
+                //设置模板token
+                listTemplate.setToken('token00');
+                listTemplate.setBackGroundImage(bkpic);
+                listTemplate.setTitle(titleStr);
+
+                //设置模版列表数组listItems其中一项，即列表的一个元素
+                let Item1 = new ListTemplateItem();
+                Item1.setToken('book01');
+                Item1.setImage(book01pic, 200, 200);
+                Item1.setPlainPrimaryText(book01Str);
+                Item1.setPlainSecondaryText('跟读0 背诵0');
+
+                let Item2 = new ListTemplateItem();
+                Item2.setToken('book02');
+                Item2.setImage(book02pic, 200, 200);
+                Item2.setPlainPrimaryText('论语');
+                Item2.setPlainSecondaryText('跟读0 背诵0');
+
+                listTemplate.addItem(Item1);
+                listTemplate.addItem(Item2);
+                //定义RenderTemplate指令
+                let directive = new RenderTemplate(listTemplate);
+                return {
+                    directives: [directive],
+                    outputSpeech: '请您先选择书籍'
+                };   
+        }
+
+
        let mode = this.getSlot('learnmode');
 	   console.log('mode ',mode)
-
         if (!mode){
             this.nlu.ask('learnmode'); 
             return { 
@@ -314,14 +325,6 @@ class GuoxueBot extends Bot {
         }
         
         let Answer = this.getSlot('theAnswer');
-
-        
-        let questionsList= this.getSessionAttribute('questionsList');
-        let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
-        console.log(currentQuestionIndex);
-
-        let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
-
         if (Answer==CurrQuestion)
         {
 
