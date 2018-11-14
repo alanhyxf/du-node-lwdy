@@ -92,6 +92,7 @@ class GuoxueBot extends Bot {
     //显示书籍目录
     showBook(event)
     {
+        this.waitAnswer();
         let token = event.token;
         console.log('console log token',token);
         if (token=='book01'){
@@ -127,12 +128,13 @@ class GuoxueBot extends Bot {
             this.setSessionAttribute('currentQuestionIndex',1); 
             this.setSessionAttribute('questionsList',questionsList); 
             this.setSessionAttribute('score',0); 
-
-  
-            let card = new Bot.Card.TextCard('准备好了就请说开始跟读或者开始测试');
+          console.log('get list',questionsList);
+           console.log('get list ', Object.values(questionsList[0])[0][1]); 
+         //  console.log('get list index',Object.values(questionsList[])[0][1]);  
+            let card = new Bot.Card.TextCard('准备好了就请说开始学习 开始跟读或者开始测试');
              return {
                 card: card,
-                outputSpeech: '准备好了就请说开始跟读或者开始测试'
+                outputSpeech: '准备好了就请说开始学习 开始跟读或者开始测试'
             };
 
         }
@@ -298,11 +300,13 @@ class GuoxueBot extends Bot {
      */
     learnIntent() {
         this.waitAnswer();
-        let mode = this.getSlot('mode');
-	    console.log('chapter',chapter)
+
+	console.log('begin to learn mode ');
+        let mode = this.getSlot('learnmode');
+	console.log('mode ',mode)
 
         if (!mode){
-            this.nlu.ask('theAnswer'); 
+            this.nlu.ask('learnmode'); 
             return { 
                 outputSpeech: '您要选择哪个模式' 
             }; 
@@ -311,27 +315,12 @@ class GuoxueBot extends Bot {
 
         let questionsList= this.getSessionAttribute('questionsList');
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
-        console.log(questionsList[currentQuestionIndex]);
-
-        
-        if (typeof(questionsList)==undefined) {
-            console.log('ask chapter'); 
-	    //this.nlu.ask('chapter');
-            //  如果有异步操作，可以返回一个promise
-            return new Promise(function (resolve, reject) {
-                resolve({
-                    directives: [this.getTemplate1(titleStr,'请选择章节',defaultBkg)],
-                    outputSpeech: '请选择书籍和章节'
-                });
-            });
-        }
-
-
+        console.log(currentQuestionIndex);
 
 
 
         return ({
-            directives: [this.getTemplate1(titleStr,questionsList[currentQuestionIndex][0],bkpic)],
+            directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex])[0][1],bkpic)],
             outputSpeech: questionsList[currentQuestionIndex][0]
         })
 
