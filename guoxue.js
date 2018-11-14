@@ -165,6 +165,10 @@ class GuoxueBot extends Bot {
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
         learnmode= this.getSessionAttribute('learnmode');
 
+        if (currentQuestionIndex=questionsList.length()){
+            currentQuestionIndex=0;
+        }
+
         console.log('current index ',currentQuestionIndex);
 
         if (currentQuestionIndex==null){
@@ -190,14 +194,12 @@ class GuoxueBot extends Bot {
         }
 
         console.log('learnmode mode',learnmode);
-        
+
         if (!learnmode){
             learnmode = this.getSlot('learnmode');
             this.setSessionAttribute('learnmode',learnmode);
         }
- 
-
-        
+         
 	    var CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
     	if (currentQuestionIndex>0){
          	CurrQuestion=Object.values(questionsList[currentQuestionIndex-1])[0][0];
@@ -211,6 +213,7 @@ class GuoxueBot extends Bot {
         {
             
             currentQuestionIndex=currentQuestionIndex+1;
+
             console.log('learn mode output',currentQuestionIndex, Object.values(questionsList[currentQuestionIndex-1])[0][0]);
             this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
             return ({
