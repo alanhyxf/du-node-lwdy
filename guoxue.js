@@ -69,24 +69,112 @@ class GuoxueBot extends Bot {
             let Item1 = new ListTemplateItem();
             Item1.setToken('chapter0101');
             Item1.setImage(book01pic, 200, 200);
-            Item1.setPlainPrimaryText('一东');
+            Item1.setPlainPrimaryText('一 东');
             Item1.setPlainSecondaryText('跟读 0 测试 0');
 
             let Item2 = new ListTemplateItem();
             Item2.setToken('chapter0102');
             Item2.setImage(book01pic, 200, 200);
-            Item2.setPlainPrimaryText('二冬');
+            Item2.setPlainPrimaryText('二 冬');
             Item2.setPlainSecondaryText('跟读 0 测试 0');
 
             let Item3 = new ListTemplateItem();
             Item3.setToken('chapter0103');
             Item3.setImage(book01pic, 200, 200);
-            Item3.setPlainPrimaryText('三江');
+            Item3.setPlainPrimaryText('三 江');
             Item3.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item4 = new ListTemplateItem();
+            Item4.setToken('chapter0103');
+            Item4.setImage(book01pic, 200, 200);
+            Item4.setPlainPrimaryText('四 支');
+            Item4.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item5 = new ListTemplateItem();
+            Item5.setToken('chapter0103');
+            Item5.setImage(book01pic, 200, 200);
+            Item5.setPlainPrimaryText('五 微');
+            Item5.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item6 = new ListTemplateItem();
+            Item6.setToken('chapter0103');
+            Item6.setImage(book01pic, 200, 200);
+            Item6.setPlainPrimaryText('六 鱼');
+            Item6.setPlainSecondaryText('跟读 0 测试 0');
+
+             let Item7 = new ListTemplateItem();
+            Item7.setToken('chapter0103');
+            Item7.setImage(book01pic, 200, 200);
+            Item7.setPlainPrimaryText('七 虞');
+            Item7.setPlainSecondaryText('跟读 0 测试 0');
+            
+            let Item8 = new ListTemplateItem();
+            Item8.setToken('chapter0103');
+            Item8.setImage(book01pic, 200, 200);
+            Item8.setPlainPrimaryText('八 齐');
+            Item8.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item9 = new ListTemplateItem();
+            Item9.setToken('chapter0103');
+            Item9.setImage(book01pic, 200, 200);
+            Item9.setPlainPrimaryText('九 佳');
+            Item9.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item10 = new ListTemplateItem();
+            Item10.setToken('chapter0103');
+            Item10.setImage(book01pic, 200, 200);
+            Item10.setPlainPrimaryText('十 灰');
+            Item10.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item11 = new ListTemplateItem();
+            Item11.setToken('chapter0103');
+            Item11.setImage(book01pic, 200, 200);
+            Item11.setPlainPrimaryText('十 一 真');
+            Item11.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item12 = new ListTemplateItem();
+            Item12.setToken('chapter0103');
+            Item12.setImage(book01pic, 200, 200);
+            Item12.setPlainPrimaryText('十 二 文');
+            Item12.setPlainSecondaryText('跟读 0 测试 0');
+
+
+            let Item13 = new ListTemplateItem();
+            Item13.setToken('chapter0103');
+            Item13.setImage(book01pic, 200, 200);
+            Item13.setPlainPrimaryText('十 三 元');
+            Item13.setPlainSecondaryText('跟读 0 测试 0');
+
+
+            let Item14 = new ListTemplateItem();
+            Item14.setToken('chapter0103');
+            Item14.setImage(book01pic, 200, 200);
+            Item14.setPlainPrimaryText('十 四 寒');
+            Item14.setPlainSecondaryText('跟读 0 测试 0');
+
+
+            let Item15 = new ListTemplateItem();
+            Item15.setToken('chapter0103');
+            Item15.setImage(book01pic, 200, 200);
+            Item15.setPlainPrimaryText('十 五 删');
+            Item15.setPlainSecondaryText('跟读 0 测试 0');
+
 
             listTemplate.addItem(Item1);
             listTemplate.addItem(Item2);
             listTemplate.addItem(Item3);
+            listTemplate.addItem(Item4);
+            listTemplate.addItem(Item5);
+            listTemplate.addItem(Item6);
+            listTemplate.addItem(Item7);
+            listTemplate.addItem(Item8);
+            listTemplate.addItem(Item9);
+            listTemplate.addItem(Item10);
+            listTemplate.addItem(Item11);
+            listTemplate.addItem(Item12);
+            listTemplate.addItem(Item13);
+            listTemplate.addItem(Item14);
+            listTemplate.addItem(Item15);
             let directive = new RenderTemplate(listTemplate);
             return {
                 directives: ['PushStack',directive],
@@ -100,7 +188,31 @@ class GuoxueBot extends Bot {
             questionsList = book01.chapter02;  }
         if (token=='chapter0103'){
             questionsList = book01.chapter03;  }
-                                  
+        if (token=='chapter0104'){
+            questionsList = book01.chapter04;  }
+        if (token=='chapter0105'){
+            questionsList = book01.chapter05;  }
+        if (token=='chapter0106'){
+            questionsList = book01.chapter06;  }
+        if (token=='chapter0107'){
+            questionsList = book01.chapter07;  }
+        if (token=='chapter0108'){
+            questionsList = book01.chapter08;  }
+        if (token=='chapter0109'){
+            questionsList = book01.chapter09;  }
+        if (token=='chapter0110'){
+            questionsList = book01.chapter10;  }
+        if (token=='chapter0111'){
+            questionsList = book01.chapter11;  }
+        if (token=='chapter0112'){
+            questionsList = book01.chapter12;  }
+        if (token=='chapter0113'){
+            questionsList = book01.chapter13;  }
+        if (token=='chapter0114'){
+            questionsList = book01.chapter14;  }
+        if (token=='chapter0115'){
+            questionsList = book01.chapter15;  }
+
         this.setSessionAttribute('currentQuestionIndex',0); 
         this.setSessionAttribute('questionsList',questionsList); 
         this.setSessionAttribute('score',0); 
