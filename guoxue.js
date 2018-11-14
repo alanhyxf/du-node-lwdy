@@ -280,7 +280,7 @@ class GuoxueBot extends Bot {
 
         let questionsList= this.getSessionAttribute('questionsList');
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
-        let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
+       
         console.log(currentQuestionIndex);
 
         if (!currentQuestionIndex){
@@ -324,6 +324,7 @@ class GuoxueBot extends Bot {
 
         }
         
+        let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
         let Answer = this.getSlot('theAnswer');
         if (Answer==CurrQuestion)
         {
@@ -332,7 +333,7 @@ class GuoxueBot extends Bot {
         }
 
         return ({
-            directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex])[0][0],bkpic)],
+            directives: [this.getTemplate1(titleStr, Object.values(CurrQuestion,bkpic)],
             outputSpeech: '请跟读'
         })
 
