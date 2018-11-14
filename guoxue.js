@@ -204,17 +204,9 @@ class GuoxueBot extends Bot {
         let Answer = this.getSlot('theAnswer');
         
 	   console.log(' Answer is,CurrQuestion is ,learnmode',Answer,CurrQuestion,learnmode)
-        if (Answer=='过'){
-            console.log(' 过');
-            currentQuestionIndex=currentQuestionIndex+1;
-            this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-            return ({
-                directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
-            })    
-        }
 
         //学习模式，直接朗读
-        if (learnmode=='learn')
+        if (learnmode=='learn'||Answer=='过')
         {
             
             currentQuestionIndex=currentQuestionIndex+1;
