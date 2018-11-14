@@ -328,15 +328,16 @@ class GuoxueBot extends Bot {
 
         let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
         let Answer = this.getSlot('theAnswer');
-        console.log(' Answer is ',Answer)
+        console.log(' Answer is,CurrQuestion is ',Answer,CurrQuestion)
         if ((Answer==CurrQuestion)||(mode=='learn'))
         {
 
             currentQuestionIndex=currentQuestionIndex+1;
+            console.log('currentQuestionIndex',currentQuestionIndex);
         }
 
         return ({
-            directives: [this.getTemplate1(titleStr, CurrQuestion,bkpic)],
+            directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex])[0][0],bkpic)],
             outputSpeech: '请跟读'
         })
 
