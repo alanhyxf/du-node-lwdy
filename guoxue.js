@@ -280,8 +280,9 @@ class GuoxueBot extends Bot {
 
         let questionsList= this.getSessionAttribute('questionsList');
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
-       
-        console.log(currentQuestionIndex);
+       let learnmode= this.getSessionAttribute('learnmode');
+
+        console.log('current index ',currentQuestionIndex);
 
         if (!currentQuestionIndex){
                 let listTemplate = new ListTemplate1();
@@ -315,25 +316,27 @@ class GuoxueBot extends Bot {
 
 
        let mode = this.getSlot('learnmode');
-	   console.log('mode ',mode)
-        if (!mode){
+	   console.log('learnmode ',mode)
+        if (!mode && !learnmode){
             this.nlu.ask('learnmode'); 
             return { 
                 outputSpeech: '您要选择哪个模式' 
             }; 
 
         }
-        
+        this.setSessionAttribute('learnmode',mode);
+
         let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
         let Answer = this.getSlot('theAnswer');
-        if (Answer==CurrQuestion)
+        console.log(' Answer is ',Answer)
+        if ((Answer==CurrQuestion)||(mode=='learn'))
         {
 
             currentQuestionIndex=currentQuestionIndex+1;
         }
 
         return ({
-            directives: [this.getTemplate1(titleStr, Object.values(CurrQuestion,bkpic)],
+            directives: [this.getTemplate1(titleStr, CurrQuestion,bkpic)],
             outputSpeech: '请跟读'
         })
 
