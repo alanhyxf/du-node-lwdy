@@ -123,11 +123,18 @@ class GuoxueBot extends Bot {
             };
         }
 
-        if (token=='token0101'){
-            let card = new Bot.Card.TextCard('准备好了就请说开始测试');
+        if (token=='chapter0101'){
+            let questionsList = book01.chapter01;
+            
+            this.setSessionAttribute('currentQuestionIndex',1); 
+            this.setSessionAttribute('questionsList',questionsList); 
+            this.setSessionAttribute('score',0); 
+
+  
+            let card = new Bot.Card.TextCard('准备好了就请说开始跟读或者开始测试');
              return {
                 card: card,
-                outputSpeech: '准备好了就请说开始测试'
+                outputSpeech: '准备好了就请说开始跟读或者开始测试'
             };
 
         }
@@ -136,127 +143,7 @@ class GuoxueBot extends Bot {
 
 
 
-    
-    getQuestion() {
-        let self=this;
-        return new Promise(function (resolve, reject) {
-            var questions=[]; 
-            let query_str ="SELECT id,ll,lr,lr1,lr2,lr3,chapter  FROM book_lwdy_sel  WHERE "+
-                "id >= (SELECT floor(RAND() * (SELECT MAX(id) FROM book_lwdy_sel))) ORDER BY id LIMIT 0,?";
-            let query_var=GAME_LENGTH;
-            let mysql_conn = ConnUtils.get_mysql_client();
-            mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if (!error){
-                    console.log('begin query question');
-                    for(var i = 0; i < results.length; i++)
-                    {
 
-                        var key=results[i].ll;
-                        var obj={};
-                        obj[key]=[results[i].lr,results[i].lr1,results[i].lr2,results[i].lr3];
-                        //obj[key]=keys[1];
-                        questions.push(obj);
-
-                    }
-
-                    
-                    let questionsList=questions;
-                    let gameQuestions = self.populateGameQuestions(questionsList);
-                    let correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-                    //console.log(correctAnswerIndex);
-                    let roundAnswers = self.populateRoundAnswers(gameQuestions, 0,correctAnswerIndex,questionsList);
-                    let currentQuestionIndex = 0;
-                    let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-                    let repromptText = '第1题 ' + spokenQuestion + '\n';
-                    for (let i = 0; i < ANSWER_COUNT; i += 1) {
-                        repromptText += ` ${i + 1}.  ${roundAnswers[i]} `;
-                    }
-                
-                    let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-                    self.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-                    self.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-                    self.setSessionAttribute('gameQuestions',gameQuestions);
-                    self.setSessionAttribute('questionsList',questionsList);
-                    self.setSessionAttribute('score',0);
-                    self.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-                    resolve(repromptText);
-
-                }else{
-                    reject(error);
- 
-                }
-            });
-        });
-    }
-
-
-
-  /**
-     *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
-     *  @param {list} translatedQuestions 所有问题列表
-     *  @return 问题id列表
-     */
-    populateGameQuestions(translatedQuestions) {
-        let gameQuestions = [];
-        let indexList = [];
-        let index = translatedQuestions.length;
-        if (GAME_LENGTH > index) {
-            throw new Error('Invalid Game Length.');
-        }
-
-        for (let i = 0; i < translatedQuestions.length; i += 1) {
-            indexList.push(i);
-        }
-
-        for (let j = 0; j < GAME_LENGTH; j += 1) {
-            let rand = Math.floor(Math.random() * index);
-            index -= 1;
-
-            let temp = indexList[index];
-            indexList[index] = indexList[rand];
-            indexList[rand] = temp;
-            gameQuestions.push(indexList[index]);
-        }
-        return gameQuestions;
-    }
-
-  /**
-     *  从问题列表中随机抽取问题。问题个数由变量GAME_LENGTH定义
-     *  @param {list} gameQuestionIndexes 一轮问答中问题id列表
-     *  @param {int} currentQuestionIndex 当前问题Index
-     *  @param {int} correctAnswerTargetLocation 当前问题答案Index
-     *  @param {list} translatedQuestions 所有问题列表
-     *  @return 当前问题答案选项列表
-     */
-    populateRoundAnswers(gameQuestionIndexes,currentQuestionIndex,correctAnswerTargetLocation,translatedQuestions) {
-        const answers = [];
-        const translatedQuestion = translatedQuestions[gameQuestionIndexes[currentQuestionIndex]];
-        const answersCopy = translatedQuestion[Object.keys(translatedQuestion)[0]].slice();
-	    let index = answersCopy.length;
-
-        if (index < ANSWER_COUNT) {
-            throw new Error('Not enough answers for question.');
-        }
-
-          // 打乱当前问题答案列表顺序
-        for (let j = 1; j < answersCopy.length; j += 1) {
-            const rand = Math.floor(Math.random() * (index - 1)) + 1;
-            index -= 1;
-
-            const swapTemp1 = answersCopy[index];
-            answersCopy[index] = answersCopy[rand];
-            answersCopy[rand] = swapTemp1;
-        }
-
-          // 将正确答案放置到correctAnswerTargetLocation的位置
-        for (let i = 0; i < ANSWER_COUNT; i += 1) {
-            answers[i] = answersCopy[i];
-        }
-        const swapTemp2 = answers[0];
-        answers[0] = answers[correctAnswerTargetLocation];
-        answers[correctAnswerTargetLocation] = swapTemp2;
-        return answers;
-    }
 
 
 
@@ -413,7 +300,7 @@ class GuoxueBot extends Bot {
      */
     learnIntent() {
         this.waitAnswer();
-        let chapter = this.getSlot('chapter');
+       // let chapter = this.getSlot('chapter');
 	    console.log('chapter',chapter)
 
         if (typeof(chapter)==undefined) {
@@ -423,51 +310,21 @@ class GuoxueBot extends Bot {
             return new Promise(function (resolve, reject) {
                 resolve({
                     directives: [this.getTemplate1(titleStr,'请选择章节',defaultBkg)],
-                    outputSpeech: '请选择章节，比如上卷第一章'
+                    outputSpeech: '请选择书籍和章节'
                 });
             });
         }
-        if(typeof(contentList)==undefined){
-            return new Promise(function (resolve, reject) {
-            var questions=[]; 
-            let query_str ="SELECT content  FROM book_lwdy_sel  WHERE "+
-                "locate(?,chapter)>0";
-            let query_var=GAME_LENGTH;
-            let mysql_conn = ConnUtils.get_mysql_client();
-            mysql_conn.query(query_str,query_var,function (error, results, fields) {
-                if (!error){
-                    console.log('begin query chapter');
-                    for(var i = 0; i < results.length; i++)
-                    {
-                        var key=results[i].content;
-                        contentList.push(key);
-                    }
-                    this.SetSessionAttribute('contentList',contentList);
-                    this.SetSessionAttribute('contentListSeq',0);
-                    resolve(contentList);
-                }else{
-                    reject(error);
-                }
-            });
-            });   
-        }
-        let contentList= this.getSessionAttribute('contentList');
-        let contentListSeq= this.getSessionAttribute('contentListSeq');
-        console.log(contentList[contentListSeq]);
-        if (contentListSeq==contentList.length){
-            this.SetSessionAttribute('contentListSeq',contentList.length);
-        }
+
+
+        let questionsList= this.getSessionAttribute('questionsList');
+        let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
+        console.log(questionsList[currentQuestionIndex]);
+
 
         return ({
-            directives: [this.getTemplate1(titleStr,contentList[contentListSeq],defaultBkg)],
-            outputSpeech: contentList[contentListSeq]
+            directives: [this.getTemplate1(titleStr,questionsList[currentQuestionIndex][0],bkpic)],
+            outputSpeech: questionsList[currentQuestionIndex][0]
         })
-
-
-
-
-
-
 
     }
 
