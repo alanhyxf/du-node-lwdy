@@ -101,7 +101,7 @@ class GuoxueBot extends Bot {
         if (token=='chapter0101'){
             let questionsList = book01.chapter01;
             
-            this.setSessionAttribute('currentQuestionIndex',1); 
+            this.setSessionAttribute('currentQuestionIndex',0); 
             this.setSessionAttribute('questionsList',questionsList); 
             this.setSessionAttribute('score',0); 
           //  console.log('get list',questionsList);
@@ -327,9 +327,24 @@ class GuoxueBot extends Bot {
         this.setSessionAttribute('learnmode',mode);
 
         let CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
+
+
         let Answer = this.getSlot('theAnswer');
         console.log(' Answer is,CurrQuestion is ',Answer,CurrQuestion)
-        if ((Answer==CurrQuestion)||(mode=='learn'))
+
+   //学习模式，直接朗读
+        if (mode=='learn')
+        {
+            currentQuestionIndex=currentQuestionIndex+1;
+            this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+            return ({
+                directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
+                outputSpeech: Object.values(questionsList[currentQuestionIndex])[0][0]
+            })
+
+        }
+
+        if ((Answer==CurrQuestion)||(mode=='follow'))
         {
 
             currentQuestionIndex=currentQuestionIndex+1;
