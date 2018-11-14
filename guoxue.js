@@ -284,7 +284,7 @@ class GuoxueBot extends Bot {
 
         console.log('current index ',currentQuestionIndex);
 
-        if (!currentQuestionIndex){
+        if (typeof(currentQuestionIndex)!="undefined"&&currentQuestionIndex!=null){
                 let listTemplate = new ListTemplate1();
                 //设置模板token
                 listTemplate.setToken('token00');
@@ -317,7 +317,7 @@ class GuoxueBot extends Bot {
 
        let mode = this.getSlot('learnmode');
 	   console.log('learnmode ',mode)
-        if (!mode && !learnmode){
+        if (typeof(mode)!="undefined"&&mode!=null )&& (typeof(learnmode)!="undefined"&&learnmode!=null){
             this.nlu.ask('learnmode'); 
             return { 
                 outputSpeech: '您要选择哪个模式' 
