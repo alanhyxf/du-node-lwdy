@@ -37,9 +37,8 @@ class InquiryBot extends Bot {
 
         this.addEventListener('Display.ElementSelected', function(event) {
             let token = event.token;
-            console.log('console log token',token)
-
-            if （token=='token01'）{
+            console.log('console log token',token);
+            if (token=='token01'){
                 let listTemplate = new ListTemplate1();
                 //设置模板token
                 listTemplate.setToken('token');
@@ -77,7 +76,7 @@ class InquiryBot extends Bot {
                 };
             }
 
-            if （token=='token0101'）{
+            if (token=='token0101'){
                  let card = new Bot.Card.TextCard('准备好了就请说开始测试');
                  return {
                     card: card,
