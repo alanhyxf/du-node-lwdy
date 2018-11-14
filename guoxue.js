@@ -28,7 +28,6 @@ const PushStack = Bot.Directive.Display.PushStack;
 
 class GuoxueBot extends Bot {
 
-
     genToken(token) {
         let buffer = new Buffer(token.toString());
         return buffer.toString('base64');
@@ -38,30 +37,20 @@ class GuoxueBot extends Bot {
         super(postData);
         this.addLaunchHandler(this.launch);
         this.addSessionEndedHandler(this.sessionEndedRequest);
-
         //选书、章节操作
         this.addEventListener('Display.ElementSelected', this.showBook);
-
         //学习模式
         this.addIntentHandler('learn_intent', this.learnIntent);
-        //跟读模式
-      
         //重新开始
         this.addIntentHandler('newGame_intent', this.newGame);
         //默认意图
         this.addIntentHandler('ai.dueros.common.default_intent', this.CommonIntent);
-        
         this.addDefaultEventListener(this.defaultEvent);
-}
-
-
+    }
 
     launch() {
         this.waitAnswer();
-
         console.log('begin launch');
-
-
     }
 
 
@@ -80,46 +69,49 @@ class GuoxueBot extends Bot {
             let Item1 = new ListTemplateItem();
             Item1.setToken('chapter0101');
             Item1.setImage(book01pic, 200, 200);
-            Item1.setPlainPrimaryText('东一');
-            Item1.setPlainSecondaryText('东一');
+            Item1.setPlainPrimaryText('一东');
+            Item1.setPlainSecondaryText('跟读 0 测试 0');
 
             let Item2 = new ListTemplateItem();
             Item2.setToken('chapter0102');
             Item2.setImage(book01pic, 200, 200);
-            Item2.setPlainPrimaryText('夏二');
-            Item2.setPlainSecondaryText('夏二');
+            Item2.setPlainPrimaryText('二冬');
+            Item2.setPlainSecondaryText('跟读 0 测试 0');
+
+            let Item3 = new ListTemplateItem();
+            Item3.setToken('chapter0103');
+            Item3.setImage(book01pic, 200, 200);
+            Item3.setPlainPrimaryText('三江');
+            Item3.setPlainSecondaryText('跟读 0 测试 0');
+
             listTemplate.addItem(Item1);
             listTemplate.addItem(Item2);
+            listTemplate.addItem(Item3);
             let directive = new RenderTemplate(listTemplate);
-            //let directive1 = new PushStack('PushStack');
             return {
-                directives: [PushStack,directive],
+                directives: ['PushStack',directive],
                 outputSpeech: '请您选择章节'
             };
         }
-
+        let questionsList = '';
         if (token=='chapter0101'){
-            let questionsList = book01.chapter01;
-            
-            this.setSessionAttribute('currentQuestionIndex',0); 
-            this.setSessionAttribute('questionsList',questionsList); 
-            this.setSessionAttribute('score',0); 
-          //  console.log('get list',questionsList);
-          //  console.log('get list ', Object.values(questionsList[0])[0][1]); 
-         //  console.log('get list index',Object.values(questionsList[])[0][1]);  
-            let card = new Bot.Card.TextCard('准备好了就请说开始学习 开始跟读或者开始测试');
-             return {
-                card: card,
-                outputSpeech: '准备好了就请说开始学习 开始跟读或者开始测试'
-            };
+            questionsList = book01.chapter01;  }
+        if (token=='chapter0102'){
+            questionsList = book01.chapter02;  }
+        if (token=='chapter0103'){
+            questionsList = book01.chapter03;  }
+                                  
+        this.setSessionAttribute('currentQuestionIndex',0); 
+        this.setSessionAttribute('questionsList',questionsList); 
+        this.setSessionAttribute('score',0); 
 
-        }
+        let card = new Bot.Card.TextCard('准备好了就请说开始学习');
+        return {
+            card: card,
+            outputSpeech: '准备好了就请说开始学习'
+        };
+
     }
-
-
-
-
-
 
 
 
@@ -127,15 +119,12 @@ class GuoxueBot extends Bot {
     	console.log(text);
         let bodyTemplate = new Bot.Directive.Display.Template.BodyTemplate1();
         bodyTemplate.setPlainTextContent(text,-1);
-	   bodyTemplate.setToken('token');
-	   bodyTemplate.setBackGroundImage(bkg);
-	   bodyTemplate.setTitle(title);
+	    bodyTemplate.setToken('token');
+	    bodyTemplate.setBackGroundImage(bkg);
+	    bodyTemplate.setTitle(title);
         let renderTemplate = new Bot.Directive.Display.RenderTemplate(bodyTemplate);
         return renderTemplate;
     }
-
-
-
 
 
     sessionEndedRequest() {
@@ -147,120 +136,15 @@ class GuoxueBot extends Bot {
     }
 
 
-
-   /**
-     * 
-     *
-     * @return {Object}
-     */
-    AnswerIntent() {
-        this.waitAnswer();
-        let theAnswer = this.getSlot('theAnswer');
-
-        
-
-        let self=this;
-        let userid=this.request.getUserId();
-        if (!theAnswer) {	
-        return this.startNewGamePromise(this.getUser(userid),this.getQuestion()).
-        then(
-            data=>{
-                   let speechOutput = '我将念上句，请你按照选项回答下句。';
-           	   let repromptText = data[1];
-                   console.log('username,repromptText',data[0],data[1]);
-                   //let card = new Bot.Card.TextCard(repromptText);
-                   return Promise.resolve({
-            directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],                    
-            outputSpeech: speechOutput +  repromptText
-                   });
-        }
-            ).catch(data=>{return {directives:[this.getTemplate1('Error','系统错误:1000',defautlBkg)]}});
-         }
-
-
-        //获取session中相关信息
-        let questionsList = this.getSessionAttribute('questionsList');
-        let score = this.getSessionAttribute('score');
-        let currentQuestionIndex = this.getSessionAttribute('currentQuestionIndex');
-        let correctAnswerIndex = this.getSessionAttribute('correctAnswerIndex');
-        let gameQuestions = this.getSessionAttribute('gameQuestions');
-        let correctAnswerText = this.getSessionAttribute('correctAnswerText');
-        let speechOutput = '';
-
-        if (theAnswer == correctAnswerIndex){
-            score += 1;
-            speechOutput = '回答正确。目前正确：' + score + '题。';
-        }else{
-            speechOutput = '很遗憾，回答错误。正确答案是' + correctAnswerText + '.目前正确：' + score + '题。';
-        }
-
-        if (currentQuestionIndex == GAME_LENGTH - 1){
-         //   speechOutput += '已经是最后一题了。您可以说重新开始来继续答题，或者说退出来退出技能。' 
-            if (score<5)
-            {
-                speechOutput += '您答对题目数量不多，要名落孙山了。您可以重新开始来继续答题，或者说退出来退出技能。'
-            } 
-            else if (score==5 || score==6)
-            {
-                speechOutput += '您获得秀才称号。您可以重新开始来继续答题，或者说退出来退出技能。'
-            } 
-            else if (score==7 || score==8)
-            {
-                speechOutput += '您获得举人称号。您可以重新开始来继续答题，或者说退出来退出技能。'
-            } 
-            else if (score==9)
-            {
-                speechOutput += '您获得进士称号。您可以重新开始来继续答题，或者说退出来退出技能。'
-            } 
-            else if (score==10)
-            {
-                speechOutput += '恭喜，您获得状元称号。您可以重新开始来继续答题，或者说退出来退出技能。'
-            } 
-
-            return {
-                outputSpeech: speechOutput
-            };
-        }
-            //获取下一题信息
-        currentQuestionIndex += 1;
-        correctAnswerIndex = Math.floor(Math.random() * (ANSWER_COUNT));
-        let spokenQuestion = Object.keys(questionsList[gameQuestions[currentQuestionIndex]])[0];
-        let roundAnswers = this.populateRoundAnswers(gameQuestions, currentQuestionIndex,correctAnswerIndex,questionsList);
-        let questionIndexForSpeech = currentQuestionIndex + 1;
-        let repromptText = '第' + questionIndexForSpeech + '题 ' + spokenQuestion + '\n';
-        for (let i = 0; i < ANSWER_COUNT; i += 1) {
-            repromptText += `${i + 1}.  ${roundAnswers[i]} `;
-        }
-        speechOutput += repromptText;
-        let currentQuestion = questionsList[gameQuestions[currentQuestionIndex]];
-        this.setSessionAttribute('speechOutput',speechOutput);
-        this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
-        this.setSessionAttribute('correctAnswerIndex',correctAnswerIndex + 1);
-        this.setSessionAttribute('gameQuestions',gameQuestions);
-        this.setSessionAttribute('questionsList',questionsList);
-        this.setSessionAttribute('score',score);
-        this.setSessionAttribute('correctAnswerText',currentQuestion[Object.keys(currentQuestion)[0]][0]);
-        let card = new Bot.Card.TextCard(repromptText);
-        console.log(repromptText)
-        return {
-             directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],
-            outputSpeech: speechOutput
-        };
-    }
-
-
     //重新开始答题，得分清零
     newGame()  {
         this.waitAnswer();
         //初始化一轮中的问题列表和第一题的话术
- 
-
         this.startNewGame().then((value)=>
-        {      console.log(value);
-             repromptText=value;}
+        {       console.log(value);
+                repromptText=value;}
        );
 
-      // let card = new Bot.Card.TextCard(repromptText);
         return {
               directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],
             outputSpeech: '好的，重新开始。' + repromptText
@@ -277,41 +161,32 @@ class GuoxueBot extends Bot {
     learnIntent() {
         this.waitAnswer();
 
-
         let questionsList= this.getSessionAttribute('questionsList');
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
-       let learnmode= this.getSessionAttribute('learnmode');
+        let learnmode= this.getSessionAttribute('learnmode');
 
         console.log('current index ',currentQuestionIndex);
 
         if (currentQuestionIndex==null){
-                let listTemplate = new ListTemplate1();
-                //设置模板token
-                listTemplate.setToken('token00');
-                listTemplate.setBackGroundImage(bkpic);
-                listTemplate.setTitle(titleStr);
+            let listTemplate = new ListTemplate1();
+            listTemplate.setToken('token00');
+            listTemplate.setBackGroundImage(bkpic);
+            listTemplate.setTitle(titleStr);
 
-                //设置模版列表数组listItems其中一项，即列表的一个元素
-                let Item1 = new ListTemplateItem();
-                Item1.setToken('book01');
-                Item1.setImage(book01pic, 200, 200);
-                Item1.setPlainPrimaryText(book01Str);
-                Item1.setPlainSecondaryText('跟读0 背诵0');
+            //设置模版列表数组listItems其中一项，即列表的一个元素
+            let Item1 = new ListTemplateItem();
+            Item1.setToken('book01');
+            Item1.setImage(book01pic, 200, 200);
+            Item1.setPlainPrimaryText(book01Str);
+            Item1.setPlainSecondaryText('跟读0 背诵0');
 
-                let Item2 = new ListTemplateItem();
-                Item2.setToken('book02');
-                Item2.setImage(book02pic, 200, 200);
-                Item2.setPlainPrimaryText('论语');
-                Item2.setPlainSecondaryText('跟读0 背诵0');
-
-                listTemplate.addItem(Item1);
-                listTemplate.addItem(Item2);
-                //定义RenderTemplate指令
-                let directive = new RenderTemplate(listTemplate);
-                return {
-                    directives: [directive],
-                    outputSpeech: '请您先选择书籍'
-                };   
+            listTemplate.addItem(Item1);
+            //定义RenderTemplate指令
+            let directive = new RenderTemplate(listTemplate);
+            return {
+                directives: [directive],
+                outputSpeech: '请您先选择书籍'
+            };   
         }
 
         if (!learnmode){
@@ -320,31 +195,25 @@ class GuoxueBot extends Bot {
              this.setSessionAttribute('learnmode',learnmode);
         }
  
-      /*  if (!mode || !learnmode){
-            this.nlu.ask('learnmode'); 
-            return { 
-                outputSpeech: '您要选择哪个模式' 
-            }; 
 
-        }*/
-    console.log('1 2 ',typeof(currentQuestionIndex),currentQuestionIndex);
-	 var CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
-    	 if (currentQuestionIndex>0){
+        
+	    var CurrQuestion=Object.values(questionsList[currentQuestionIndex])[0][0];
+    	if (currentQuestionIndex>0){
          	CurrQuestion=Object.values(questionsList[currentQuestionIndex-1])[0][0];
       	}
         let Answer = this.getSlot('theAnswer');
         
-	console.log(' Answer is,CurrQuestion is ,learnmode',Answer,CurrQuestion,learnmode)
+	   console.log(' Answer is,CurrQuestion is ,learnmode',Answer,CurrQuestion,learnmode)
         if (Answer=='过'){
             console.log(' 过');
             currentQuestionIndex=currentQuestionIndex+1;
             this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
             return ({
                 directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
-                  })    
+            })    
         }
 
-   //学习模式，直接朗读
+        //学习模式，直接朗读
         if (learnmode=='learn')
         {
             
@@ -360,7 +229,6 @@ class GuoxueBot extends Bot {
 
         if ((Answer==CurrQuestion)&&(learnmode=='follow'))
         {
-
             currentQuestionIndex=currentQuestionIndex+1;
             console.log('currentQuestionIndex',currentQuestionIndex);
             return ({
@@ -368,14 +236,7 @@ class GuoxueBot extends Bot {
             outputSpeech: '请跟读'
             })
         }
-
-
-
     }
-
-
-        
-
 
 
     CommonIntent() {
