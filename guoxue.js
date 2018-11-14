@@ -348,7 +348,7 @@ class GuoxueBot extends Bot {
             this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
             return ({
                 directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
-                outputSpeech: Object.values(questionsList[currentQuestionIndex])[0][0]
+                outputSpeech: Object.values(questionsList[currentQuestionIndex-1])[0][0]
             })
 
         }
@@ -359,7 +359,7 @@ class GuoxueBot extends Bot {
             currentQuestionIndex=currentQuestionIndex+1;
             console.log('currentQuestionIndex',currentQuestionIndex);
             return ({
-            directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex])[0][0],bkpic)],
+            directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
             outputSpeech: '请跟读'
             })
         }
