@@ -252,15 +252,25 @@ class GuoxueBot extends Bot {
     newGame()  {
         this.waitAnswer();
         //初始化一轮中的问题列表和第一题的话术
-        this.startNewGame().then((value)=>
-        {       console.log(value);
-                repromptText=value;}
-       );
+            let listTemplate = new ListTemplate1();
+            listTemplate.setToken('token00');
+            listTemplate.setBackGroundImage(bkpic);
+            listTemplate.setTitle(titleStr);
 
-        return {
-              directives: [this.getTemplate1(titleStr,repromptText,defaultBkg)],
-            outputSpeech: '好的，重新开始。' + repromptText
-        };
+            //设置模版列表数组listItems其中一项，即列表的一个元素
+            //            let Item1 = new ListTemplateItem();
+            //                        Item1.setToken('book01');
+            //                                    Item1.setImage(book01pic, 200, 200);
+            //                                                Item1.setPlainPrimaryText(book01Str);
+            //                                                            Item1.setPlainSecondaryText('跟读0 背诵0');
+            //
+            //                                                                        listTemplate.addItem(Item1);
+            //                                                                                    //定义RenderTemplate指令
+            //                                                                                                let directive = new RenderTemplate(listTemplate);
+            //                                                                                                            return {
+            //                                                                                                                            directives: [directive],
+            //                                                                                                                                            outputSpeech: '请您先选择书籍'
+            //                                                                                                                                                        };   
     }
 
 
@@ -276,10 +286,10 @@ class GuoxueBot extends Bot {
         let questionsList= this.getSessionAttribute('questionsList');
         let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
         learnmode= this.getSessionAttribute('learnmode');
-
-        if (currentQuestionIndex=questionsList.length()){
+   if (questionsList!=null) {
+        if (currentQuestionIndex==Object.values(questionsList).length){
             currentQuestionIndex=0;
-        }
+        }}
 
         console.log('current index ',currentQuestionIndex);
 
