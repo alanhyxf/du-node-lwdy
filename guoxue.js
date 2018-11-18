@@ -44,7 +44,9 @@ class GuoxueBot extends Bot {
         //选书、章节操作
         this.addEventListener('Display.ElementSelected', this.ScreenSel);
         //学习模式
-        this.addIntentHandler('learn_intent', this.learnIntent);
+        this.addIntentHandler('learnintent', this.learnIntent);
+
+        this.addIntentHandler('answer_slot_learnintent_theAnswer', this.AnswerIntent);
         //重新开始
         this.addIntentHandler('newGame_intent', this.newGame);
         //默认意图
@@ -310,6 +312,40 @@ class GuoxueBot extends Bot {
     }
 
 
+    AnswerIntent()
+    {
+        this.waitAnswer();
+        Answer = this.getSlot('theAnswer');
+        console.log('get Answer',Answer);    
+      
+        if (!Answer){
+        this.nlu.ask('theAnswer');
+            let card2 = new Bot.Card.TextCard('请跟读，或者说过');
+            return {
+                card: card2,
+                outputSpeech: '请跟读，或者说过'
+            };
+        }
+        let learnmode= this.getSessionAttribute('learnmode');
+        let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
+        let questionsList=this.getSessionAttribute('questionsList'); 
+        //学习模式，直接朗读
+        if (learnmode=='learn'||Answer=='过')
+        {
+            
+            this.nlu.ask('theAnswer');
+            currentQuestionIndex=currentQuestionIndex+1;
+
+            console.log('learn mode output',currentQuestionIndex, Object.values(questionsList[currentQuestionIndex-1])[0][0]);
+            this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
+            return ({
+                directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
+                outputSpeech: Object.values(questionsList[currentQuestionIndex-1])[0][0]
+            })
+
+        }
+
+    }
 
    /**
      * 学习模式
@@ -324,7 +360,7 @@ class GuoxueBot extends Bot {
         let Answer='';
          let questionsList='';
         bookSel = this.getSlot('bookname');
-	console.log('bookSel:,type', bookSel,typeof(bookSel));
+	   console.log('bookSel:,type', bookSel,typeof(bookSel));
        
 	// Answer = this.getSlot('theAnswer');
 	//console.log('get Answer',Answer);
@@ -335,7 +371,7 @@ class GuoxueBot extends Bot {
             return this.showBook();
         }
 
-        chapterSel=this.getSlot('chaptername');
+    chapterSel=this.getSlot('chaptername');
 	console.log('chapterSel',chapterSel);      
   	if (!chapterSel&&(bookSel=='book01')){
 	   this.nlu.ask('chaptername');
