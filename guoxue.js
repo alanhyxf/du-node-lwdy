@@ -37,7 +37,6 @@ class GuoxueBot extends Bot {
    constructor(postData) {
         super(postData);
 	var questionList='';
-	var currentQuestionIndex='';
 	
         this.addLaunchHandler(this.launch);
         this.addSessionEndedHandler(this.sessionEndedRequest);
@@ -259,7 +258,6 @@ class GuoxueBot extends Bot {
         this.setSessionAttribute('questionsList',questionsList); 
         this.setSessionAttribute('score',0); 
 
-        console.log('getQuestion',questionsList);
 
     }
 
@@ -360,19 +358,15 @@ class GuoxueBot extends Bot {
         let Answer='';
          let questionsList='';
         bookSel = this.getSlot('bookname');
-	   console.log('bookSel:,type', bookSel,typeof(bookSel));
-       
-	// Answer = this.getSlot('theAnswer');
-	//console.log('get Answer',Answer);
-
+       let currentQuestionIndex=0; 
+	questionsList=this.getSessionAttribute('questionsList');
 	 if (!bookSel||bookSel=='undefined')
         {
 	    this.nlu.ask('bookname');
             return this.showBook();
         }
 
-    chapterSel=this.getSlot('chaptername');
-	console.log('chapterSel',chapterSel);      
+        chapterSel=this.getSlot('chaptername');
   	if (!chapterSel&&(bookSel=='book01')){
 	   this.nlu.ask('chaptername');
             return this.showChapter('book01');
@@ -386,7 +380,7 @@ class GuoxueBot extends Bot {
         learnmode = this.getSlot('learnmode');
         if (!learnmode){
 	    this.nlu.ask('learnmode');
-            let card = new Bot.Card.TextCard('准备好了就请说开始学习');
+            let card = new Bot.Card.TextCard('准备好了就请说开始学习,请跟随屏幕提示跟读，超长句请说过');
             return {
                 card: card,
                 outputSpeech: '准备好了就请说开始学习'
@@ -394,15 +388,11 @@ class GuoxueBot extends Bot {
             
         }
         
-
-        //questionsList= this.getSessionAttribute('questionsList');
-        let currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
+        currentQuestionIndex= this.getSessionAttribute('currentQuestionIndex');
         questionsList=this.getSessionAttribute('questionsList'); 
-       //learnmode= this.getSessionAttribute('learnmode');
 
 
         if (questionsList!=null) {
-	    // console.log('if questonlist is full ');
             if (currentQuestionIndex==Object.values(questionsList).length){
                 currentQuestionIndex=0;
             }
@@ -422,16 +412,12 @@ class GuoxueBot extends Bot {
                 outputSpeech: '请跟读，或者说过'
             };
         }
-        console.log(' Answer is,CurrQuestion  ,learnmode',Answer,CurrQuestion,learnmode)
 
         //学习模式，直接朗读
         if (learnmode=='learn'||Answer=='过')
         {
-	    console.log('Answer is ',Answer);
             this.nlu.ask('theAnswer');
             currentQuestionIndex=currentQuestionIndex+1;
-
-            console.log('learn mode output',currentQuestionIndex, Object.values(questionsList[currentQuestionIndex-1])[0][0]);
             this.setSessionAttribute('currentQuestionIndex',currentQuestionIndex);
             return ({
                 directives: [this.getTemplate1(titleStr, Object.values(questionsList[currentQuestionIndex-1])[0][0],bkpic)],
@@ -442,7 +428,7 @@ class GuoxueBot extends Bot {
 
         if ((Answer==CurrQuestion)&&(learnmode=='follow'))
         {
-      this.nlu.ask('theAnswer');
+      	    this.nlu.ask('theAnswer');
             currentQuestionIndex=currentQuestionIndex+1;
             console.log('currentQuestionIndex',currentQuestionIndex);
             return ({
